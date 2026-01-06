@@ -1,142 +1,117 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Search, Heart, Wifi, MapPin, Clock, Phone, Instagram, Facebook, ChevronDown, ChevronRight, ChevronUp, X, Coffee, Wine, PartyPopper, Utensils, List } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+// Χρησιμοποιούμε μόνο βασικά εικονίδια για ασφάλεια
+import { Search, Heart, Wifi, Home, X, ChevronRight, ChevronDown, ChevronUp, Coffee, Wine, Martini, List, Clock, MapPin, Instagram } from 'lucide-react';
 import './App.css';
 
-// --- ASSETS (VIDEO & IMAGES) ---
+// --- ΕΙΚΟΝΕΣ (Assets) ---
 const ASSETS = {
-  // Cinematic Video για την Αρχική (Public)
   heroVideo: "https://assets.mixkit.co/videos/preview/mixkit-bartender-making-a-cocktail-with-smoke-33777-large.mp4",
-  // Generic Εικόνες Κατηγοριών (High Quality Dark Mood)
-  coffee: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600",
-  brunch: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600",
-  food: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600",
-  cocktail: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600",
-  wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600",
-  whiskey: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=600",
-  beer: "https://images.unsplash.com/photo-1623961990059-28437797f62d?auto=format&fit=crop&w=600",
-  dessert: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=600",
-  refresh: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600"
+  cat_coffee: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600",
+  cat_brunch: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600",
+  cat_food: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600",
+  cat_cocktail: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600",
+  cat_wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600",
+  cat_whiskey: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=600",
+  cat_beer: "https://images.unsplash.com/photo-1623961990059-28437797f62d?auto=format&fit=crop&w=600",
+  cat_dessert: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=600",
 };
 
-// --- DATA: MENU STRUCTURE ---
+// --- ΔΕΔΟΜΕΝΑ ΜΕΝΟΥ ---
 const MENU_DATA = [
   {
-    id: 'coffee', title: "Coffee & Beverages", type: 'list', img: ASSETS.coffee,
+    id: 'coffee', title: "Coffee & Beverages", type: 'list', img: ASSETS.cat_coffee,
     items: [
       { name: "Espresso", price: 2.50 }, { name: "Espresso Double", price: 3.00 },
       { name: "Freddo Espresso", price: 3.50 }, { name: "Cappuccino", price: 3.80 },
-      { name: "Freddo Cappuccino", price: 4.00 }, { name: "Freddo Cappuccino Crema", price: 4.20 },
-      { name: "Greek Coffee", price: 2.50 }, { name: "Filter Coffee", price: 3.00 },
-      { name: "Nescafe Frappe", price: 3.00 }, { name: "Chocolate Hot/Cold", price: 4.00 },
-      { name: "Tea (Various Flavors)", price: 3.00 }, { name: "Mochaccino", price: 4.50 }
+      { name: "Freddo Cappuccino", price: 4.00 }, { name: "Greek Coffee", price: 2.50 },
+      { name: "Nescafe Frappe", price: 3.00 }, { name: "Chocolate", price: 4.00 },
+      { name: "Tea (Various)", price: 3.00 }, { name: "Mochaccino", price: 4.50 }
     ]
   },
   {
-    id: 'signatures', title: "Signature Cocktails", type: 'card', img: ASSETS.cocktail,
+    id: 'signatures', title: "Signature Cocktails", type: 'card', img: ASSETS.cat_cocktail,
     items: [
       { name: "Zombie", price: 10.00, desc: "Rum blend, Pineapple, Passion Fruit, Fire" },
       { name: "Mai Tai", price: 10.00, desc: "Rum blend, Almond, Lime" },
       { name: "Paseo Sunset", price: 10.00, desc: "Vodka, Strawberry Puree, Lime" },
-      { name: "Stoly Kiss", price: 9.00, desc: "Vodka, Mastic, Cranberry, Pomegranate" },
-      { name: "Porn Star Martini", price: 10.00, desc: "Passion Fruit, Vanilla Vodka, Prosecco shot" },
-      { name: "Mango Mule", price: 6.00, desc: "Alcohol Free - Pineapple, Lime, Mango, Tonic" }
+      { name: "Stoly Kiss", price: 9.00, desc: "Vodka, Mastic, Cranberry" },
+      { name: "Porn Star Martini", price: 10.00, desc: "Passion Fruit, Vanilla Vodka" },
+      { name: "Mango Mule", price: 6.00, desc: "Alcohol Free - Pineapple, Lime, Mango" }
     ]
   },
   {
-    id: 'classics', title: "Classic Cocktails", type: 'list', img: ASSETS.cocktail,
+    id: 'classics', title: "Classic Cocktails", type: 'list', img: ASSETS.cat_cocktail,
     items: [
       { name: "Aperol Spritz", price: 8.00 }, { name: "Negroni", price: 9.00 },
       { name: "Mojito", price: 9.00 }, { name: "Daiquiri", price: 9.00 },
-      { name: "Margarita", price: 9.00 }, { name: "Cosmopolitan", price: 9.00 },
-      { name: "Old Fashioned", price: 9.00 }, { name: "Paloma", price: 8.50 }
+      { name: "Margarita", price: 9.00 }, { name: "Old Fashioned", price: 9.00 },
+      { name: "Paloma", price: 8.50 }, { name: "Apple Martini", price: 9.00 }
     ]
   },
   {
-    id: 'brunch', title: "Brunch & Pancakes", type: 'card', img: ASSETS.brunch,
+    id: 'brunch', title: "Brunch & Snacks", type: 'card', img: ASSETS.cat_brunch,
     items: [
       { name: "Pancakes Chocolate", price: 7.50, desc: "Hazelnut praline, biscuit" },
       { name: "Pancakes Bueno", price: 7.50, desc: "Bueno cream, crispy waffle" },
-      { name: "Pancakes Savory", price: 7.00, desc: "Bacon, cheese, fried egg, hollandaise" },
-      { name: "Chicken Pancakes", price: 8.50, desc: "Bacon, cheddar, corn, peppers" },
+      { name: "Pancakes Savory", price: 7.00, desc: "Bacon, cheese, fried egg" },
+      { name: "Chicken Pancakes", price: 8.50, desc: "Bacon, cheddar, corn" },
       { name: "Club Sandwich", price: 8.00, desc: "Classic with fries" },
-      { name: "Scrambled Eggs", price: 7.50, desc: "Feta, avocado, cherry tomatoes" }
+      { name: "Scrambled Eggs", price: 7.50, desc: "Feta, avocado, bread" }
     ]
   },
   {
-    id: 'food', title: "Bar Kitchen", type: 'card', img: ASSETS.food,
+    id: 'food', title: "Bar Kitchen", type: 'card', img: ASSETS.cat_food,
     items: [
-      { name: "Black Angus Burger", price: 13.00, desc: "Premium beef, cheddar, sauces, fries" },
-      { name: "Sweet & Hot Burger", price: 9.50, desc: "Spicy kick, fries" },
+      { name: "Black Angus Burger", price: 13.00, desc: "Premium beef, cheddar, fries" },
       { name: "Pizza Special", price: 14.00, desc: "Family size" },
       { name: "Chicken Nuggets", price: 7.00, desc: "9 pcs" },
       { name: "Bao Buns Chicken", price: 9.50, desc: "3 pcs, sweet chili" },
       { name: "Risotto", price: 9.00, desc: "Creamy risotto" },
-      { name: "Fillet Bourbon", price: 25.00, desc: "Premium meat with Bourbon sauce" },
-      { name: "Cheese Platter", price: 8.00, desc: "Variety of cheeses (2 persons)" }
+      { name: "Fillet Bourbon", price: 25.00, desc: "Premium meat, Bourbon sauce" },
+      { name: "Cheese Platter", price: 8.00, desc: "Variety of cheeses" }
     ]
   },
   {
-    id: 'spirits', title: "Spirits & Cellar", type: 'group', img: ASSETS.whiskey,
+    id: 'spirits', title: "Spirits & Cellar", type: 'group', img: ASSETS.cat_whiskey,
     groups: [
-      {
-        name: "Standard Whiskey (7€ Bottle: 70€)",
-        items: ["Famous Grouse", "Johnnie Red", "Haig", "Dewars", "Cutty Sark", "Jameson", "Bushmills"]
-      },
-      {
-        name: "Premium Whiskey",
-        items: ["Johnnie Black 12 (8€)", "Chivas Regal 12 (8€)", "Jack Daniels (8€)", "Dimple (9€)", "Cardhu (9€)", "Glenfiddich 12 (10€)", "Lagavulin 16 (20€)", "Macallan 12 (20€)"]
-      },
-      {
-        name: "Vodka",
-        items: ["Standard (Serkova, Stolichnaya...) (7€)", "Ketel One (9€)", "Ciroc (10€)", "Belvedere (13€)", "Grey Goose (15€)", "Beluga (15€)"]
-      },
-      {
-        name: "Gin",
-        items: ["Standard (Gordons, Beefeater) (7€)", "Tanqueray / Bombay (8€)", "Hendricks (13€)", "Monkey 47 (15€)"]
-      },
-      {
-        name: "Tequila",
-        items: ["Jose Cuervo (7€)", "Don Julio Blanco (10€)", "Don Julio Anejo (13€)"]
-      },
-      {
-        name: "Rum",
-        items: ["Bacardi / Havana (7€)", "Diplomatico (12€)", "Zacapa (13€)"]
-      }
+      { name: "Standard Whiskey (7€)", items: ["Famous Grouse", "Johnnie Red", "Haig", "Jameson", "Bushmills"] },
+      { name: "Premium Whiskey", items: ["Johnnie Black 12 (8€)", "Chivas 12 (8€)", "Jack Daniels (8€)", "Cardhu (9€)", "Glenfiddich 12 (10€)", "Macallan 12 (20€)"] },
+      { name: "Vodka", items: ["Standard (7€)", "Belvedere (13€)", "Grey Goose (15€)", "Ciroc (10€)"] },
+      { name: "Gin", items: ["Standard (7€)", "Tanqueray (8€)", "Hendricks (13€)", "Monkey 47 (15€)"] },
+      { name: "Tequila", items: ["Jose Cuervo (7€)", "Don Julio Blanco (10€)", "Don Julio Anejo (13€)"] },
+      { name: "Rum", items: ["Bacardi (7€)", "Havana (7€)", "Diplomatico (12€)", "Zacapa (13€)"] }
     ]
   },
   {
-    id: 'wine', title: "Wine List", type: 'group', img: ASSETS.wine,
+    id: 'wine', title: "Wine List", type: 'group', img: ASSETS.cat_wine,
     groups: [
-      { name: "White Wines", items: ["Epops (6€ / 22€)", "Malagouzia Simeonidi (6.5€ / 23€)", "Biblia Chora (28€)", "Magic Mountain (35€)"] },
+      { name: "White Wines", items: ["Epops (6€ / 22€)", "Malagouzia (6.5€ / 23€)", "Biblia Chora (28€)"] },
       { name: "Red Wines", items: ["Epops (6.3€ / 24€)", "Biblia Chora (29€)", "Magic Mountain (43€)"] },
-      { name: "Sparkling & Dessert", items: ["Prosecco Cinzano (5.5€)", "Moscato D'Asti (6€)", "Moet & Chandon (120€)", "Sangria (5.5€)"] }
+      { name: "Sparkling", items: ["Prosecco (5.5€)", "Moscato D'Asti (6€)", "Moet (120€)"] }
     ]
   },
   {
-    id: 'beer', title: "Beers", type: 'list', img: ASSETS.beer,
+    id: 'beer', title: "Beers", type: 'list', img: ASSETS.cat_beer,
     items: [
       { name: "Mythos Draft 400ml", price: 4.50 }, { name: "Kaiser Draft 400ml", price: 5.00 },
-      { name: "Fix / Fix Dark", price: 4.00 }, { name: "Corona / Stella", price: 5.00 },
-      { name: "McFarland", price: 5.50 }, { name: "Guinness", price: 6.00 }
+      { name: "Corona / Stella", price: 5.00 }, { name: "McFarland", price: 5.50 },
+      { name: "Guinness", price: 6.00 }, { name: "Cider", price: 5.50 }
     ]
   },
   {
-    id: 'dessert', title: "Desserts & Refresh", type: 'list', img: ASSETS.dessert,
+    id: 'dessert', title: "Desserts", type: 'list', img: ASSETS.cat_dessert,
     items: [
       { name: "Chocolate Sphere", price: 9.00 }, { name: "Cheesecake", price: 5.00 },
-      { name: "Souffle", price: 5.50 }, { name: "Ice Cream Scoop", price: 2.00 },
-      { name: "Smoothies", price: 6.00 }, { name: "Fresh Juice", price: 4.00 },
-      { name: "Soft Drinks", price: 3.00 }
+      { name: "Souffle", price: 5.50 }, { name: "Ice Cream Scoop", price: 2.00 }
     ]
   }
 ];
 
-// =========================================
-// COMPONENT 1: PUBLIC WEBSITE (NO PRICES)
-// =========================================
+// --- 1. PUBLIC SITE (ΒΙΤΡΙΝΑ) ---
 function PublicSite() {
   const videoRef = useRef(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     if(videoRef.current) videoRef.current.play().catch(() => {});
@@ -157,19 +132,20 @@ function PublicSite() {
         <h2 className="tagline">PREMIUM LOUNGE EXPERIENCE</h2>
         
         <div className="info-grid">
-          <div className="info-box">
-             <Clock size={20} color="#C5A065"/>
+          {/* ΚΟΥΜΠΙ ΩΡΑΣ -> ΠΑΕΙ ΣΤΟ ΜΕΝΟΥ */}
+          <div className="info-box secret-trigger" onClick={() => navigate('/qr-menu')}>
+             <Clock size={24} color="#C5A065"/>
              <p>Daily<br/>08:00 - 03:00</p>
           </div>
           <div className="info-box">
-             <MapPin size={20} color="#C5A065"/>
+             <MapPin size={24} color="#C5A065"/>
              <p>Kavala<br/>Ethnikis Antistaseos 12</p>
           </div>
         </div>
 
         <div className="action-buttons">
            <a href="tel:+302510834378" className="btn-gold">ΚΡΑΤΗΣΗ ΤΡΑΠΕΖΙΟΥ</a>
-           <a href="https://instagram.com" target="_blank" className="btn-outline">INSTAGRAM</a>
+           <a href="https://instagram.com" target="_blank" rel="noreferrer" className="btn-outline">INSTAGRAM</a>
         </div>
       </div>
       
@@ -180,17 +156,14 @@ function PublicSite() {
   );
 }
 
-// =========================================
-// COMPONENT 2: QR MENU (THE SECRET APP)
-// =========================================
+// --- 2. QR MENU (ΕΦΑΡΜΟΓΗ) ---
 function SecretMenu() {
-  const [mood, setMood] = useState(null); // 'day' or 'night'
+  const [mood, setMood] = useState(null);
   const [category, setCategory] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [showMyList, setShowMyList] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState(null);
 
-  // Toggle Favorite logic
   const toggleFav = (item) => {
     setFavorites(prev => {
       const exists = prev.find(i => i.name === item.name);
@@ -199,46 +172,56 @@ function SecretMenu() {
     });
   };
 
-  // 1. MOOD SELECTOR SCREEN
+  // WRAPPER ΓΙΑ ΝΑ ΚΕΝΤΡΑΡΕΙ ΣΤΟ PC
+  const MobileWrapper = ({ children }) => (
+    <div className="mobile-wrapper">
+      <div className="menu-phone-frame">
+        {children}
+      </div>
+    </div>
+  );
+
+  // 1. MOOD SCREEN
   if (!mood) {
     return (
-      <div className="menu-root mood-bg">
-         <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-small" />
-         <h1 className="mood-title">Choose your Vibe</h1>
-         
-         <div className="mood-cards">
-            <div className="mood-card" onClick={() => setMood('day')}>
-               <Coffee size={32} color="#C5A065"/>
-               <h3>Day & Brunch</h3>
-               <p>Coffee, Pancakes, Snacks</p>
-            </div>
-            <div className="mood-card" onClick={() => setMood('night')}>
-               <PartyPopper size={32} color="#C5A065"/>
-               <h3>Night & Drinks</h3>
-               <p>Cocktails, Spirits, Food</p>
-            </div>
-            <div className="mood-card full" onClick={() => setMood('all')}>
-               <List size={32} color="#C5A065"/>
-               <h3>Full Menu</h3>
-            </div>
-         </div>
-      </div>
+      <MobileWrapper>
+        <div className="menu-content mood-bg">
+           <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-small" alt="logo" />
+           <h1 className="mood-title">Choose your Vibe</h1>
+           
+           <div className="mood-cards">
+              <div className="mood-card" onClick={() => setMood('day')}>
+                 <Coffee size={30} color="#C5A065"/>
+                 <h3>Day & Brunch</h3>
+              </div>
+              <div className="mood-card" onClick={() => setMood('night')}>
+                 <Martini size={30} color="#C5A065"/>
+                 <h3>Night & Drinks</h3>
+              </div>
+              <div className="mood-card full" onClick={() => setMood('all')}>
+                 <List size={30} color="#C5A065"/>
+                 <h3>Full Menu</h3>
+              </div>
+           </div>
+        </div>
+      </MobileWrapper>
     );
   }
 
-  // 2. MY LIST SCREEN (WAITER VIEW)
+  // 2. MY LIST SCREEN
   if (showMyList) {
      const total = favorites.reduce((sum, item) => sum + (item.price || 0), 0);
      return (
-        <div className="menu-root list-view">
+      <MobileWrapper>
+        <div className="menu-content list-view">
            <div className="sticky-header">
               <button onClick={() => setShowMyList(false)} className="icon-btn"><X/></button>
               <h2>My Selection</h2>
-              <div style={{width: 40}}></div>
+              <div style={{width: 24}}></div>
            </div>
-           <div className="list-content">
+           <div className="list-scroll">
               {favorites.length === 0 ? (
-                 <div className="empty-state">Your list is empty.<br/>Tap the heart icon to add items.</div>
+                 <div className="empty-state">List is empty.<br/>Add items with the heart icon.</div>
               ) : (
                  <div className="order-list">
                     {favorites.map((item, idx) => (
@@ -251,32 +234,32 @@ function SecretMenu() {
                        </div>
                     ))}
                     <div className="total-row">
-                       <span>Total Estimate:</span>
+                       <span>Total:</span>
                        <span>€{total.toFixed(2)}</span>
-                    </div>
-                    <div className="waiter-note">
-                       Show this screen to your waiter to order.
                     </div>
                  </div>
               )}
            </div>
         </div>
+      </MobileWrapper>
      )
   }
 
-  // 3. CATEGORY LIST SCREEN
+  // 3. CATEGORY LIST
   if (!category) {
      const visibleCats = MENU_DATA.filter(cat => {
         if(mood === 'all') return true;
-        if(mood === 'day') return ['coffee', 'brunch', 'dessert', 'refresh', 'food'].includes(cat.id);
+        if(mood === 'day') return ['coffee', 'brunch', 'dessert', 'food'].includes(cat.id);
         if(mood === 'night') return ['signatures', 'classics', 'spirits', 'wine', 'beer', 'food', 'dessert'].includes(cat.id);
+        return true;
      });
 
      return (
-        <div className="menu-root">
+      <MobileWrapper>
+        <div className="menu-content">
            <div className="sticky-header">
               <button onClick={() => setMood(null)} className="icon-btn"><ChevronDown/></button>
-              <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="header-logo" />
+              <span className="header-title">MENU</span>
               <button onClick={() => setShowMyList(true)} className="icon-btn relative">
                  <Heart fill={favorites.length > 0 ? "#C5A065" : "none"} color="#C5A065"/>
                  {favorites.length > 0 && <span className="badge">{favorites.length}</span>}
@@ -293,13 +276,14 @@ function SecretMenu() {
            </div>
            <div className="wifi-bar"><Wifi size={14}/> WiFi: <strong>paseo2024</strong></div>
         </div>
+      </MobileWrapper>
      );
   }
 
-  // 4. ITEMS SCREEN (HYBRID LAYOUT)
+  // 4. ITEMS SCREEN
   return (
-     <div className="menu-root">
-        {/* Category Header */}
+   <MobileWrapper>
+     <div className="menu-content">
         <div className="cat-header-hero" style={{backgroundImage: `url(${category.img})`}}>
            <div className="overlay-grad">
               <button onClick={() => setCategory(null)} className="back-bubble"><ChevronRight style={{transform:'rotate(180deg)'}}/></button>
@@ -308,8 +292,6 @@ function SecretMenu() {
         </div>
 
         <div className="items-scroll">
-           
-           {/* TYPE: CARDS (Cocktails/Food) */}
            {category.type === 'card' && (
               <div className="cards-stack">
                  {category.items.map((item, i) => (
@@ -327,7 +309,6 @@ function SecretMenu() {
               </div>
            )}
 
-           {/* TYPE: LIST (Coffee/Beer) */}
            {category.type === 'list' && (
               <div className="list-stack">
                  {category.items.map((item, i) => (
@@ -347,7 +328,6 @@ function SecretMenu() {
               </div>
            )}
 
-           {/* TYPE: GROUP (Spirits/Wines) */}
            {category.type === 'group' && (
               <div className="group-stack">
                  {category.groups.map((grp, i) => (
@@ -369,14 +349,14 @@ function SecretMenu() {
            )}
         </div>
 
-        {/* Floating Button for My List */}
         {favorites.length > 0 && (
            <div className="floating-bar" onClick={() => setShowMyList(true)}>
-              <span>View Selection ({favorites.length})</span>
-              <ChevronUp/>
+              <span>Selection ({favorites.length})</span>
+              <ChevronUp size={16}/>
            </div>
         )}
      </div>
+   </MobileWrapper>
   );
 }
 
