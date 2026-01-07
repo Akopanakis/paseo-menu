@@ -1,374 +1,321 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Heart, Wifi, X, ChevronRight, ChevronDown, ChevronUp, Coffee, Martini, List, Clock, MapPin, Flame, Leaf, Star, Share2, MessageCircle, Map, Instagram, Sparkles, Smile } from 'lucide-react';
+import { Heart, X, ChevronDown, ChevronUp, Clock, Star, Map, Instagram, MessageCircle, Globe, ChevronRight, Flame, Leaf, Wine, Sparkles } from 'lucide-react';
 import './App.css';
 
-// --- ASSETS ---
+// --- ASSETS (High Quality Dark Aesthetic) ---
 const ASSETS = {
   heroImage: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1080",
+  // 4+1 GRID IMAGES
+  grid_coffee: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
+  grid_food: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80", 
+  grid_cocktails: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600&q=80",
+  grid_wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80",
+  
+  // CATEGORY HEADERS
   cat_coffee: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600",
   cat_brunch: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600",
   cat_food: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600",
   cat_starters: "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600",
-  cat_cocktail: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600",
-  cat_wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600",
+  cat_cocktail: "https://images.unsplash.com/photo-1536935338788-843bb6319105?auto=format&fit=crop&w=600",
+  cat_wine: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=600",
   cat_whiskey: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=600",
   cat_beer: "https://images.unsplash.com/photo-1623961990059-28437797f62d?auto=format&fit=crop&w=600",
   cat_dessert: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=600",
 };
 
-// --- DATA ---
-const REVIEWS = [
-  { user: "Maria K.", text: "Best cocktails in Kavala! The Zombie is a must.", stars: 5 },
-  { user: "John D.", text: "Amazing atmosphere and great music.", stars: 5 },
-  { user: "Elena P.", text: "Great brunch and coffee.", stars: 5 }
-];
+// --- TRANSLATIONS ---
+const UI = {
+  el: {
+    menu: "ΜΕΝΟΥ", myList: "Η Λίστα μου", empty: "Η λίστα είναι άδεια.", total: "Σύνολο",
+    waiter: "Δείξτε αυτή την οθόνη στον σερβιτόρο.", book: "ΚΡΑΤΗΣΗ", open: "ΑΝΟΙΧΤΑ", closed: "ΚΛΕΙΣΤΑ",
+    review: "Αξιολογήστε μας", choose: "Επιλέξτε", glass: "Ποτήρι", bottle: "Φιάλη",
+    vibe: "Επιλέξτε Κατηγορία", full: "Πλήρες Μενού",
+    t_coffee: "Καφές & Brunch", t_food: "Φαγητό & Burgers", t_drinks: "Cocktails & Ποτά", t_wine: "Κρασί & Κάβα",
+    sommelier_title: "Δεν ξέρεις τι να διαλέξεις;", sommelier_desc: "Ο ψηφιακός Sommelier θα βρει το ποτό σου σε 3 βήματα!", sommelier_btn: "Βρες το ποτό μου"
+  },
+  en: {
+    menu: "MENU", myList: "My Selection", empty: "Your list is empty.", total: "Total",
+    waiter: "Show this screen to your waiter.", book: "BOOK A TABLE", open: "OPEN NOW", closed: "CLOSED",
+    review: "Rate us on Google", choose: "Select Option", glass: "Glass", bottle: "Bottle",
+    vibe: "Select Category", full: "Full Menu",
+    t_coffee: "Coffee & Brunch", t_food: "Kitchen & Burgers", t_drinks: "Cocktails & Drinks", t_wine: "Wine & Spirits",
+    sommelier_title: "Can't decide?", sommelier_desc: "Let our digital Sommelier find your drink in 3 steps!", sommelier_btn: "Find my drink"
+  }
+};
 
+// --- SOMMELIER DATA ---
+const SOMMELIER_DB = {
+    cocktails: [
+        { name: "Daiquiri Strawberry", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Πουρές Φράουλα", en:"White Rum, Lime, Strawberry Puree"}, type: "sweet", base: "rum" },
+        { name: "Pina Colada", ingredients: {el:"Λευκό Ρούμι, Ανανάς, Λικέρ Καρύδας", en:"White Rum, Pineapple, Coconut Liqueur"}, type: "sweet", base: "rum" },
+        { name: "Stoly Kiss", ingredients: {el:"Βότκα, Μαστίχα, Κράνμπερι, Ρόδι", en:"Vodka, Mastic, Cranberry, Pomegranate"}, type: "sweet", base: "vodka" },
+        { name: "Apple Martini", ingredients: {el:"Βότκα, Λάιμ, Πράσινο μήλο", en:"Vodka, Lime, Green Apple"}, type: "sweet", base: "vodka" },
+        { name: "Aperol Spritz", ingredients: {el:"Aperol, Prosecco, Soda", en:"Aperol, Prosecco, Soda"}, type: "sour", base: "other" },
+        { name: "Mojito", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Μέντα, Σόδα", en:"White Rum, Lime, Mint, Soda"}, type: "sour", base: "rum" },
+        { name: "Daiquiri", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Ζάχαρη", en:"White Rum, Lime, Sugar"}, type: "sour", base: "rum" },
+        { name: "Margarita", ingredients: {el:"Tequila, Triple Sec, Λεμόνι", en:"Tequila, Triple Sec, Lemon"}, type: "sour", base: "tequila" },
+        { name: "Paloma", ingredients: {el:"Tequila, Λάιμ, Pink Grapefruit Soda", en:"Tequila, Lime, Pink Grapefruit Soda"}, type: "sour", base: "tequila" },
+        { name: "Cosmopolitan", ingredients: {el:"Βότκα, Triple Sec, Κράνμπερι, Λάιμ", en:"Vodka, Triple Sec, Cranberry, Lime"}, type: "sour", base: "vodka" },
+        { name: "Caipirinha", ingredients: {el:"Cachaca, Λάιμ, Μαύρη Ζάχαρη", en:"Cachaca, Lime, Brown Sugar"}, type: "sour", base: "rum" },
+        { name: "Gin Cucumber", ingredients: {el:"Gin, Σιρόπι αγγούρι, Λάιμ, Σόδα", en:"Gin, Cucumber, Lime, Soda"}, type: "sour", base: "gin" },
+        { name: "Negroni", ingredients: {el:"Campari, Gin, Cinzano Rosso", en:"Campari, Gin, Cinzano Rosso"}, type: "bitter", base: "gin" },
+        { name: "Old Fashioned", ingredients: {el:"Whiskey, Angostura, Ζάχαρη", en:"Whiskey, Angostura, Sugar"}, type: "bitter", base: "whiskey" },
+        { name: "Dry Martini", ingredients: {el:"Gin, Dry Vermouth", en:"Gin, Dry Vermouth"}, type: "bitter", base: "gin" },
+        { name: "Mai Tai", ingredients: {el:"Λευκό & Μαύρο Ρούμι, Αμύγδαλο, Λάιμ", en:"White & Dark Rum, Almond, Lime"}, type: "strong", base: "rum" },
+        { name: "Zombie", ingredients: {el:"Blend ρούμι, Μπράντυ, Ανανάς, Πορτοκάλι", en:"Rum blend, Brandy, Pineapple, Orange"}, type: "strong", base: "rum" },
+        { name: "Long Island", ingredients: {el:"Ρούμι, Gin, Βότκα, Tequila, Cola", en:"Rum, Gin, Vodka, Tequila, Cola"}, type: "strong", base: "all" },
+        { name: "Bloody Mary", ingredients: {el:"Βότκα, Ντομάτα, Tabasco, Worcestershire", en:"Vodka, Tomato, Tabasco, Worcestershire"}, type: "strong", base: "vodka" }
+    ],
+    mocktails: [
+        { name: "Mango Mule", ingredients: {el:"Ανανάς, Λάιμ, Μάνγκο, Τόνικ", en:"Pineapple, Lime, Mango, Tonic"} },
+        { name: "Red Paseo", ingredients: {el:"Κράνμπερι, Ρόδι, Λεμόνι", en:"Cranberry, Pomegranate, Lemon"} },
+        { name: "Lady Lavender", ingredients: {el:"Λεβάντα, Γκρέιπφρουτ, Σόδα", en:"Lavender, Grapefruit, Soda"} },
+        { name: "Green Gentleman", ingredients: {el:"Ακτινίδιο, Πορτοκάλι, Ροδάκινο", en:"Kiwi, Orange, Peach"} }
+    ]
+};
+
+// --- MENU DATA (EXISTING) ---
 const MENU_DATA = [
-  // 1. STARTERS & SALADS (NEW DETAILED)
+  // 1. STARTERS
   {
-    id: 'starters', title: "Starters & Salads", type: 'card', img: ASSETS.cat_starters,
+    id: 'starters', title: {el: "Ορεκτικά & Σαλάτες", en: "Starters & Salads"}, type: 'card', img: ASSETS.cat_starters,
     items: [
-      // Starters
-      { name: "Crostini Caprese (3pcs)", price: 6.50, desc: "Bread, mozzarella, cherry tomatoes, basil pesto", tags: ['veg'] },
-      { name: "Bruschetta Pork (3pcs)", price: 7.50, desc: "Bread (fry), Sage Creme, Smoked pork tenderloin, grated parmesan" },
-      { name: "Tragano (4pcs)", price: 8.00, desc: "Fyllo stuffed with graviera Naxou, goat cheese, fig marmalade, mustard seeds", tags: ['veg'] },
+      { name: "Crostini Caprese (3pcs)", price: 6.50, desc: {el: "Ψωμάκια Moinellas, μοτσαρέλα, ντοματίνια, πέστο", en: "Bread mozzarella, cherry tomatoes, basil pesto"}, tags: ['veg'] },
+      { name: "Bruschetta Pork (3pcs)", price: 7.50, desc: {el: "Ψωμάκια, κρέμα φασκόμηλο, καπνιστό ψαρονέφρι, παρμεζάνα", en: "Bread, Sage Creme, Smoked pork tenderloin, parmesan"} },
+      { name: "Tragano (4pcs)", price: 8.00, desc: {el: "Ρολό με γραβιέρα Νάξου, κατσικίσιος κορμός, μαρμελάδα σύκο", en: "Fyllo with graviera Naxou, goat cheese, fig marmalade"}, tags: ['veg'] },
       { name: "Ethnic Basket (14pcs)", price: 12.00, desc: "Arancini, Empanadas, Spring rolls", ribbon: "Sharing" },
-      { name: "Caliente (8pcs)", price: 7.50, desc: "Cheese nuggets with spicy peppers and mozzarella sticks", tags: ['spicy'] },
-      // Vegan
-      { name: "Vegetables Springrolls (4pcs)", price: 7.00, desc: "Vegetable spring rolls with sweet-chilli sauce", tags: ['vegan'] },
-      { name: "Falafel (5pcs)", price: 7.00, desc: "Croquettes with chickpeas & herbs", tags: ['vegan'] },
-      { name: "Veggie Burger (2pcs)", price: 7.00, desc: "Burger with chia seeds, buckwheat, oatmeal flakes, french fries", tags: ['vegan'] },
-      // Salads
-      { name: "Flower Pot", price: 9.00, desc: "Goat cheese, carob crackers, capers, cherry tomatoes, thyme, cucumber, olive, onion, peppers, sun-dried tomato sauce", tags: ['veg'] },
-      { name: "The Warm One", price: 9.50, desc: "Spinach, arugula, saute beef, semi sun-dried tomato, fried feta with sesame, balsamic, pine" },
-      { name: "Paseo Caesar's", price: 9.50, desc: "Iceberg, croutons, crispy chicken, lettuce, bacon, maple, caesar's sauce, parmesan" },
-      { name: "Vegetable Garden", price: 8.00, desc: "Iceberg, lettuce, rocca, spinach, avocado, mustard & honey vinaigrette", tags: ['vegan'] }
+      { name: "Caliente (8pcs)", price: 7.50, desc: {el: "Κροκέτες τυριού, καυτερή πιπεριά, στικς μοτσαρέλας", en: "Cheese nuggets, spicy peppers, mozzarella sticks"}, tags: ['spicy'] },
+      { name: "Vegetables Springrolls (4pcs)", price: 7.00, desc: {el: "Ρολάκια λαχανικών με γλυκόξινη σάλτσα", en: "Vegetable spring rolls with sweet-chilli sauce"}, tags: ['vegan'] },
+      { name: "Falafel (5pcs)", price: 7.00, desc: {el: "Κροκέτες με ρεβύθια & μυρωδικά", en: "Croquettes with chickpeas & herbs"}, tags: ['vegan'] },
+      { name: "Veggie Burger (2pcs)", price: 7.00, desc: {el: "Μπιφτέκι με τσία, φαγόπυρο, βρώμη, πατάτες", en: "Burger with chia, buckwheat, oatmeal, fries"}, tags: ['vegan'] },
+      { name: "Flower Pot Salad", price: 9.00, desc: {el: "Κατσικίσιος κορμός, παξιμάδι, ντοματίνια, θυμάρι", en: "Goat cheese, carob crackers, cherry tomatoes, thyme"}, tags: ['veg'] },
+      { name: "The Warm One", price: 9.50, desc: {el: "Σπανάκι, ρόκα, μοσχάρι σοτέ, φέτα τηγανητή", en: "Spinach, arugula, saute beef, fried feta"} },
+      { name: "Paseo Caesar's", price: 9.50, desc: {el: "Iceberg, κοτόπουλο πανέ, μπέικον, σως καίσαρα", en: "Iceberg, crispy chicken, bacon, caesar's sauce"} },
+      { name: "Vegetable Garden", price: 8.00, desc: {el: "Iceberg, ρόκα, σπανάκι, αβοκάντο, βινεγκρέτ", en: "Iceberg, rocca, spinach, avocado, vinaigrette"}, tags: ['vegan'] }
     ]
   },
-
-  // 2. FINGER FOOD & BURGERS
+  // 2. FINGER FOOD
   {
-    id: 'food', title: "Finger Food & Burgers", type: 'card', img: ASSETS.cat_food,
+    id: 'food', title: {el: "Finger Food & Burgers", en: "Finger Food & Burgers"}, type: 'card', img: ASSETS.cat_food,
     items: [
-      { name: "Pizza Special", price: 14.00, desc: "Mozzarella, tomato sauce, parmesan, rocca, basil pesto, mushrooms, bacon, peppers" },
-      { name: "Pizza Margarita", price: 12.00, desc: "Mozzarella, tomato sauce, parmesan, rocca, basil pesto", tags: ['veg'] },
-      { name: "Pizza Prosciutto", price: 14.00, desc: "Mozzarella, tomato sauce, parmesan, basil pesto, rocca, prosciutto" },
-      { name: "Pizza Burratina", price: 14.00, desc: "Tomato sauce, mozzarella, parmesan, burrata, bresaola, rocca, basil pesto" },
-      { name: "Beef Bao Buns (3pcs)", price: 10.00, desc: "Beef fillet, spring onions, sauce bolognese" },
-      { name: "Chicken Bao Buns (3pcs)", price: 9.50, desc: "Chicken, sesame, teriyaki sauce, spring sauce, ginger powder" },
-      { name: "Fajitas Chicken", price: 12.50, desc: "Chicken, peppers, onions, tomatoes, tortillas, ranchero, guacamole, creme fraiche" },
-      { name: "Mini Burgers (2pcs)", price: 9.00, desc: "Brioche, beef 60gr, caramelized onions, cheddar, lettuce, mayo pickles, fries" },
-      { name: "Club Sandwich Classic", price: 8.00, desc: "Bomba bread, gouda, mayo, bacon, ham, tomato, fries" },
-      { name: "Club Sandwich Chicken", price: 9.00, desc: "Bomba bread, mayo, gouda, bacon, chicken, tomato, lettuce, fries" },
-      { name: "Club Sandwich Kavurma", price: 9.00, desc: "Kavurma, omelette, Elassona cheese, lettuce, tomato, fries" },
+      { name: "Pizza Special", price: 14.00, desc: {el: "Μοτσαρέλα, σάλτσα, μπέικον, μανιτάρια, πιπεριές", en: "Mozzarella, sauce, bacon, mushrooms, peppers"} },
+      { name: "Pizza Margarita", price: 12.00, desc: {el: "Μοτσαρέλα, σάλτσα ντομάτας, βασιλικός", en: "Mozzarella, tomato sauce, basil"}, tags: ['veg'] },
+      { name: "Pizza Prosciutto", price: 14.00, desc: {el: "Μοτσαρέλα, σάλτσα, προσούτο, ρόκα", en: "Mozzarella, sauce, prosciutto, rocca"} },
+      { name: "Pizza Burratina", price: 14.00, desc: {el: "Σάλτσα, μπουράτα, μπρεζάολα, ρόκα", en: "Sauce, burrata, bresaola, rocca"} },
+      { name: "Beef Bao Buns (3pcs)", price: 10.00, desc: {el: "Φιλέτο μοσχάρι, σάλτσα μπολονέζ", en: "Beef fillet, bolognese sauce"} },
+      { name: "Chicken Bao Buns (3pcs)", price: 9.50, desc: {el: "Κοτόπουλο, τεριγιάκι, τζίντζερ", en: "Chicken, teriyaki, ginger"} },
+      { name: "Fajitas Chicken", price: 12.50, desc: {el: "Κοτόπουλο, τορτίγια, γουακαμόλε", en: "Chicken, tortilla, guacamole"} },
+      { name: "Mini Burgers (2pcs)", price: 9.00, desc: {el: "Μπριός, μοσχάρι, τσένταρ, πατάτες", en: "Brioche, beef, cheddar, fries"} },
+      { name: "Club Sandwich Classic", price: 8.00, desc: {el: "Ζαμπόν, μπέικον, γκούντα, πατάτες", en: "Ham, bacon, gouda, fries"} },
+      { name: "Club Sandwich Chicken", price: 9.00, desc: {el: "Κοτόπουλο, μπέικον, γκούντα, πατάτες", en: "Chicken, bacon, gouda, fries"} },
+      { name: "Club Sandwich Kavurma", price: 9.00, desc: {el: "Καβουρμάς, ομελέτα, κασέρι, πατάτες", en: "Kavurma, omelette, cheese, fries"} },
       { name: "Chicken Nuggets (8pcs)", price: 7.00 },
-      { name: "Nuggets w/ Philadelphia", price: 7.00, desc: "6pcs Stuffed chicken nuggets" },
-      { name: "Smoked Burger", price: 9.50, desc: "Brioche, beef 180gr, iceberg, crisp bacon, tomato, Jack Daniels sauce, tobacco oil, fries" },
-      { name: "Sweet & Hot Burger", price: 9.50, desc: "Brioche, beef 180gr, iceberg, white cheddar, chipotle mayo, bourbon peach sauce, fries", tags: ['spicy'] }
+      { name: "Nuggets Philadelphia", price: 7.00, desc: {el: "Γεμιστές με φιλαδέλφεια", en: "Stuffed with philadelphia"} },
+      { name: "Smoked Burger", price: 9.50, desc: {el: "180γρ, Μπέικον, Jack Daniels σως, πατάτες", en: "180gr, Bacon, Jack Daniels sauce, fries"} },
+      { name: "Sweet & Hot Burger", price: 9.50, desc: {el: "180γρ, Τσένταρ, Τσιπότλε, πατάτες", en: "180gr, Cheddar, Chipotle, fries"}, tags: ['spicy'] },
+      { name: "Black Angus Burger", price: 13.00, desc: {el: "Premium κιμάς, μπέικον jam, τρούφα", en: "Premium beef, bacon jam, truffle"}, ribbon: "Top Choice" }
     ]
   },
-
-  // 3. MAIN DISHES & PLATTERS
+  // 3. MAIN DISHES
   {
-    id: 'main', title: "Main Dishes & Platters", type: 'card', img: ASSETS.cat_food,
+    id: 'main', title: {el: "Κυρίως Πιάτα", en: "Main Dishes"}, type: 'card', img: ASSETS.cat_food,
     items: [
-      { name: "Risotto", price: 9.00, desc: "Rice, forest mushrooms, truffle, parmesan", tags: ['veg'] },
-      { name: "Ravioli", price: 12.00, desc: "Stuffed with anthotiro & spinach, mascarpone cream, parmesan, truffle, Marsala wine", tags: ['veg'] },
-      { name: "Chicken Tagliatelle", price: 12.00, desc: "Chicken, carrot, zucchini, mushrooms, spring onions, heavy cream, tarragon" },
-      { name: "Salmon Tagliatelle", price: 13.00, desc: "Smoked salmon, mascarpone, spring onions, poppy seeds, vodka, lime zest" },
-      { name: "Medallion", price: 15.00, desc: "Pork fillet, potato & mushroom puree, truffle oil, mushroom sauce" },
-      { name: "Chicken Balottine", price: 15.00, desc: "Chicken, mozzarella, sun-dried tomato, basil, prosciutto, gnocchi, parmesan" },
-      { name: "Bourbon Fillet", price: 25.00, desc: "Beef fillet, butter potatoes, grilled asparagus, sour cherry Jack Daniels sauce" },
-      { name: "Fillet a La Madagascar", price: 25.00, desc: "Beef fillet, grilled vegetables, sauce green pepper" },
-      { name: "Grilled Beef Fillet 125g", price: 15.00 },
-      { name: "Grilled Beef Fillet 250g", price: 23.00 },
-      { name: "Grilled Chicken Fillet", price: 10.50 },
-      { name: "Cheese Platter", price: 14.00, desc: "Kefalotiri, peperoncino, goat cheese, blue cheese, dried fruit (4 persons)", tags: ['veg'] },
-      { name: "Cold Cuts & Cheese", price: 14.00, desc: "Cheeses, prosciutto, turkey, smoked tenderloin (4 persons)" }
+      { name: "Risotto", price: 9.00, desc: {el: "Μανιτάρια δάσους, τρούφα, παρμεζάνα", en: "Forest mushrooms, truffle, parmesan"}, tags: ['veg'] },
+      { name: "Ravioli", price: 12.00, desc: {el: "Ανθότυρο, σπανάκι, κρέμα μασκαρπόνε, τρούφα", en: "Anthotiro, spinach, mascarpone, truffle"}, tags: ['veg'] },
+      { name: "Chicken Tagliatelle", price: 12.00, desc: {el: "Κοτόπουλο, λαχανικά, κρέμα γάλακτος", en: "Chicken, vegetables, heavy cream"} },
+      { name: "Salmon Tagliatelle", price: 13.00, desc: {el: "Καπνιστός σολομός, βότκα, λάιμ", en: "Smoked salmon, vodka, lime"} },
+      { name: "Medallion", price: 15.00, desc: {el: "Χοιρινό φιλέτο, πουρές, λάδι τρούφας", en: "Pork fillet, puree, truffle oil"} },
+      { name: "Chicken Balottine", price: 15.00, desc: {el: "Κοτόπουλο, μοτσαρέλα, προσούτο, νιόκι", en: "Chicken, mozzarella, prosciutto, gnocchi"} },
+      { name: "Bourbon Fillet", price: 25.00, desc: {el: "Φιλέτο μοσχάρι, σως βύσσινο Jack Daniels", en: "Beef fillet, sour cherry Jack Daniels sauce"} },
+      { name: "Fillet a La Madagascar", price: 25.00, desc: {el: "Φιλέτο μοσχάρι, σως πράσινο πιπέρι", en: "Beef fillet, green pepper sauce"} },
+      { name: {el: "Φιλέτο Μόσχου (125γρ)", en: "Beef Fillet (125g)"}, price: 15.00 },
+      { name: {el: "Φιλέτο Μόσχου (250γρ)", en: "Beef Fillet (250g)"}, price: 23.00 },
+      { name: {el: "Φιλέτο Κοτόπουλο", en: "Chicken Fillet"}, price: 10.50 },
+      { name: {el: "Πιατέλα Τυριών", en: "Cheese Platter"}, price: 14.00, desc: {el: "4 ατόμων", en: "4 persons"} },
+      { name: {el: "Πιατέλα Αλλαντικών", en: "Cold Cuts Platter"}, price: 14.00, desc: {el: "4 ατόμων", en: "4 persons"} }
     ]
   },
-
-  // 4. SIGNATURE COCKTAILS
+  // 4. SIGNATURES
   {
-    id: 'signatures', title: "Signature Cocktails", type: 'card', img: ASSETS.cat_cocktail,
+    id: 'signatures', title: { el: "Signature Cocktails", en: "Signature Cocktails" }, type: 'card', img: ASSETS.cat_cocktail,
     items: [
-      { name: "Zombie", price: 10.00, desc: "Rum blend, Cointreau, Brandy, Pineapple, Orange, Grenadine, Lime", tags: ['strong'], ribbon: "Best Seller" },
-      { name: "Mai Tai", price: 10.00, desc: "White Rum, Dark Rum, Orange liqueur, Almond liqueur, Lime" },
-      { name: "Paseo Sunset", price: 10.00, desc: "Vodka, Strawberry Puree, Vanilla Syrup, Lime", tags: ['popular', 'sweet'], ribbon: "Signature" },
-      { name: "Spicy Mango", price: 12.00, desc: "Tequila Reposado, Mango, Chili, Lime", tags: ['spicy'] },
-      { name: "Stoly Kiss", price: 9.00, desc: "Vodka, Mastic liqueur, Cranberry juice, Pomegranate puree, Lemon" },
-      { name: "Porn Star Martini", price: 10.00, desc: "Passion Fruit, Vanilla Vodka" },
-      { name: "Mango Mule", price: 6.00, desc: "Alcohol Free: Pineapple, Lime, Mango, Tonic", tags: ['0%'] },
-      { name: "Red Paseo", price: 6.00, desc: "Alcohol Free: Cranberry, Pomegranate, Lemon", tags: ['0%'] },
-      { name: "Lady Lavender", price: 6.00, desc: "Alcohol Free: Grenadine, Lavender, Soda, Grapefruit", tags: ['0%'] },
-      { name: "Green Gentleman", price: 6.50, desc: "Alcohol Free: Kiwi, Orange, Peach", tags: ['0%'] }
+      { name: "Zombie", price: 10.00, desc: {el: "Blend ρούμι, Ανανάς, Πάθος, Φωτιά", en: "Rum blend, Pineapple, Passion Fruit, Fire"}, tags: ['strong'], ribbon: "Best Seller" },
+      { name: "Mai Tai", price: 10.00, desc: {el: "Blend ρούμι, Αμύγδαλο, Λάιμ", en: "Rum blend, Almond, Lime"} },
+      { name: "Paseo Sunset", price: 10.00, desc: {el: "Βότκα, Φράουλα, Βανίλια, Λάιμ", en: "Vodka, Strawberry, Vanilla"}, tags: ['popular', 'sweet'], ribbon: "Signature" },
+      { name: "Spicy Mango", price: 10.00, desc: {el: "Τεκίλα, Μάνγκο, Τσίλι", en: "Tequila, Mango, Chili"}, tags: ['spicy'] },
+      { name: "Stoly Kiss", price: 9.00, desc: {el: "Βότκα, Μαστίχα, Κράνμπερι", en: "Vodka, Mastic, Cranberry"} },
+      { name: "Mango Mule", price: 6.00, desc: "Alcohol Free", tags: ['0%'] },
+      { name: "Red Paseo", price: 6.00, desc: "Alcohol Free", tags: ['0%'] }
     ]
   },
-
-  // 5. CLASSIC COCKTAILS
+  // 5. CLASSICS
   {
-    id: 'classics', title: "Classic Cocktails", type: 'list', img: ASSETS.cat_cocktail,
+    id: 'classics', title: {el: "Classic Cocktails", en: "Classic Cocktails"}, type: 'list', img: ASSETS.cat_cocktail,
     items: [
-      { name: "Aperol Spritz", price: 8.00, desc: "Aperol, Cinzano To Spritz, Soda" },
-      { name: "Negroni", price: 9.00, desc: "Campari, Bulldog Gin, Cinzano 1757" },
-      { name: "Mojito", price: 9.00, desc: "White Rum, Lime, Soda, Brown Sugar" },
-      { name: "Daiquiri", price: 9.00, desc: "White Rum, Lime, Sugar Syrup" },
-      { name: "Daiquiri Strawberry", price: 10.00, desc: "White Rum, Lime, Strawberry Puree" },
-      { name: "Margarita", price: 9.00, desc: "Tequila, Triple Sec, Fresh Lemon" },
-      { name: "Cosmopolitan", price: 9.00, desc: "Vodka, Triple Sec, Cranberry, Lime" },
-      { name: "Long Island", price: 10.00, desc: "Triple Sec, Rum, Gin, Vodka, Tequila, Cola" },
-      { name: "Cuba Libre", price: 8.00, desc: "White Rum, Cola, Lime" },
-      { name: "Pina Colada", price: 9.00, desc: "Rum, Pineapple, Coconut" },
-      { name: "Caipirinha", price: 8.50, desc: "Cachaca, Lime, Brown Sugar" },
-      { name: "Caipiroska", price: 8.50, desc: "Vodka, Lime, Brown Sugar" },
-      { name: "Bloody Mary", price: 10.00, desc: "Vodka, Tomato, Spices" },
-      { name: "Old Fashioned", price: 9.00, desc: "Whiskey, Bitters, Sugar" },
-      { name: "Paloma", price: 8.50, desc: "Tequila, Lime, Pink Grapefruit" },
-      { name: "Apple Martini", price: 9.00, desc: "Vodka, Lime, Green Apple" },
-      { name: "Gin Cucumber", price: 8.50, desc: "Gin, Cucumber, Lime, Soda" },
-      { name: "Dry Martini", price: 8.50, desc: "Gin, Dry Vermouth" }
+      { name: "Aperol Spritz", price: 8.00 }, { name: "Negroni", price: 9.00 },
+      { name: "Mojito", price: 9.00 }, { name: "Daiquiri", price: 9.00 },
+      { name: "Margarita", price: 9.00 }, { name: "Cosmopolitan", price: 9.00 },
+      { name: "Pina Colada", price: 9.00 }, { name: "Paloma", price: 8.50 },
+      { name: "Old Fashioned", price: 9.00 }
     ]
   },
-
-  // 6. SPIRITS (FAVORITES ENABLED)
+  // 6. SPIRITS
   {
-    id: 'spirits', title: "Spirits & Cellar", type: 'group', img: ASSETS.cat_whiskey,
+    id: 'spirits', title: {el: "Ποτά & Κάβα", en: "Spirits & Cellar"}, type: 'group', img: ASSETS.cat_whiskey,
     groups: [
       {
-        name: "Standard Whiskey",
+        name: {el: "Standard Whiskey", en: "Standard Whiskey"},
         items: [
-          {n: "Famous Grouse", p: "7.00€ / 70.00€"}, {n: "Johnnie Red", p: "7.00€ / 70.00€"},
-          {n: "Haig", p: "7.00€ / 70.00€"}, {n: "Dewars", p: "7.00€ / 70.00€"},
-          {n: "Cutty Sark", p: "7.00€ / 70.00€"}, {n: "Ballantines", p: "7.00€ / 70.00€"},
-          {n: "Grants", p: "7.00€ / 70.00€"}, {n: "Bells", p: "7.00€ / 70.00€"},
-          {n: "J&B", p: "7.00€ / 70.00€"}, {n: "Teachers", p: "7.00€ / 70.00€"},
-          {n: "Jameson", p: "7.00€ / 70.00€"}, {n: "Tullamore", p: "8.00€ / 80.00€"},
-          {n: "Bushmills", p: "8.00€ / 80.00€"}
+          { name: "Famous Grouse", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Johnnie Red", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Haig", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Jameson", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Tullamore", variants: [{p: 8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 80, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
-        name: "Premium / Single Malts",
+        name: {el: "Premium & Malts", en: "Premium & Malts"},
         items: [
-          {n: "Jim Beam", p: "7.50€ / 75.00€"}, {n: "Four Roses", p: "8.00€ / 80.00€"},
-          {n: "Canadian Club", p: "7.50€ / 75.00€"}, {n: "Johnnie Black 12", p: "8.00€ / 80.00€"},
-          {n: "Chivas Regal 12", p: "8.00€ / 80.00€"}, {n: "Jack Daniel's", p: "8.00€ / 80.00€"},
-          {n: "Gentleman Jack", p: "10.00€ / 100.00€"}, {n: "Naked Malt", p: "8.50€ / 85.00€"},
-          {n: "Jameson Black", p: "9.00€ / 90.00€"}, {n: "Dimple", p: "9.00€ / 90.00€"},
-          {n: "Cardhu", p: "9.00€ / 90.00€"}, {n: "Dewars 12", p: "9.00€ / 90.00€"},
-          {n: "Crown Royal", p: "11.00€ / 110.00€"}, {n: "Glenfiddich 12", p: "10.00€ / 100.00€"},
-          {n: "Glenfiddich Rich Oak", p: "12.00€ / 120.00€"}, {n: "Glenfiddich 15", p: "14.00€ / 140.00€"},
-          {n: "Johnnie Double Black", p: "12.00€ / 120.00€"}, {n: "Johnnie Gold", p: "13.00€ / 130.00€"},
-          {n: "Johnnie Green", p: "14.00€ / 140.00€"}, {n: "Johnnie Blue", p: "40.00€ / 400.00€"},
-          {n: "Talisker", p: "11.00€ / 110.00€"}, {n: "Oban", p: "14.00€ / 140.00€"},
-          {n: "Lagavulin 8", p: "14.00€ / 140.00€"}, {n: "Lagavulin 16", p: "20.00€ / 200.00€"},
-          {n: "Jack Single Barrel", p: "15.00€ / 150.00€"}, {n: "Haig Club", p: "18.00€ / 180.00€"},
-          {n: "The Glenrothes 10", p: "13.00€ / 130.00€"}, {n: "Chivas Regal 18", p: "22.00€ / 220.00€"},
-          {n: "Jack Gold No. 27", p: "25.00€ / 250.00€"}, {n: "Macallan 12", p: "20.00€ / 200.00€"},
-          {n: "Macallan 15", p: "28.00€ / 280.00€"}, {n: "Macallan Rare Cask", p: "60.00€ / 600.00€"}
+          { name: "Johnnie Black 12", variants: [{p: 8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 80, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Chivas Regal 12", variants: [{p: 8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 80, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Jack Daniel's", variants: [{p: 8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 80, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Cardhu", variants: [{p: 9, l:{el:'Ποτήρι',en:'Glass'}}, {p: 90, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Glenfiddich 12", variants: [{p: 10, l:{el:'Ποτήρι',en:'Glass'}}, {p: 100, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Lagavulin 16", variants: [{p: 20, l:{el:'Ποτήρι',en:'Glass'}}, {p: 200, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Macallan 12", variants: [{p: 20, l:{el:'Ποτήρι',en:'Glass'}}, {p: 200, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
         name: "Vodka",
         items: [
-          {n: "Finlandia", p: "8.00€ / 80.00€"}, {n: "Serkova", p: "7.00€ / 70.00€"},
-          {n: "Stolichnaya", p: "7.00€ / 70.00€"}, {n: "Absolut", p: "7.00€ / 70.00€"},
-          {n: "Smirnoff Red", p: "7.00€ / 70.00€"}, {n: "Russian Standard", p: "7.00€ / 70.00€"},
-          {n: "Ursus", p: "7.00€ / 70.00€"}, {n: "Smirnoff North", p: "7.00€ / 70.00€"},
-          {n: "Ketel One", p: "9.00€ / 90.00€"}, {n: "Ciroc", p: "10.00€ / 100.00€"},
-          {n: "Belvedere", p: "13.00€ / 130.00€"}, {n: "Beluga", p: "15.00€ / 150.00€"},
-          {n: "Snow Leopard", p: "15.00€ / 150.00€"}, {n: "Grey Goose", p: "15.00€ / 150.00€"},
-          {n: "Stolichnaya Elit", p: "20.00€ / 200.00€"}
+          { name: "Serkova", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Stolichnaya", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Absolut", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Belvedere", variants: [{p: 13, l:{el:'Ποτήρι',en:'Glass'}}, {p: 130, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Grey Goose", variants: [{p: 15, l:{el:'Ποτήρι',en:'Glass'}}, {p: 150, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Ciroc", variants: [{p: 10, l:{el:'Ποτήρι',en:'Glass'}}, {p: 100, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
         name: "Gin",
         items: [
-          {n: "Juniper", p: "7.00€ / 70.00€"}, {n: "Gordons", p: "7.00€ / 70.00€"},
-          {n: "Beefeater", p: "7.00€ / 70.00€"}, {n: "Tanqueray", p: "8.00€ / 80.00€"},
-          {n: "Bombay", p: "8.00€ / 80.00€"}, {n: "Brokers", p: "8.00€ / 80.00€"},
-          {n: "Bulldog", p: "9.00€ / 90.00€"}, {n: "Tanqueray 10", p: "11.00€ / 110.00€"},
-          {n: "Hendricks", p: "13.00€ / 130.00€"}, {n: "G Vine", p: "14.00€ / 140.00€"},
-          {n: "Monkey 47", p: "15.00€ / 150.00€"}
-        ]
-      },
-      {
-        name: "Rum",
-        items: [
-          {n: "Bacardi", p: "7.00€ / 70.00€"}, {n: "Havana", p: "7.00€ / 70.00€"},
-          {n: "Havana Dark", p: "8.00€ / 80.00€"}, {n: "Captain Morgan", p: "8.00€ / 80.00€"},
-          {n: "Sailor Jerry", p: "8.00€ / 80.00€"}, {n: "Appleton", p: "8.50€ / 85.00€"},
-          {n: "Havana 7", p: "8.50€ / 85.00€"}, {n: "Angostura Gold", p: "8.50€ / 85.00€"},
-          {n: "Diplomatico", p: "12.00€ / 120.00€"}, {n: "Zacapa", p: "13.00€ / 130.00€"}
+          { name: "Gordons", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Tanqueray", variants: [{p: 8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 80, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Hendricks", variants: [{p: 13, l:{el:'Ποτήρι',en:'Glass'}}, {p: 130, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Monkey 47", variants: [{p: 15, l:{el:'Ποτήρι',en:'Glass'}}, {p: 150, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
         name: "Tequila",
         items: [
-          {n: "Jose Cuervo Blanco", p: "7.00€ / 70.00€"}, {n: "Jose Cuervo Reposado", p: "7.00€ / 70.00€"},
-          {n: "Jose Cuervo Silver Trad.", p: "8.50€ / 85.00€"}, {n: "Jose Cuervo Reposad Trad.", p: "8.50€ / 85.00€"},
-          {n: "Olmeca Dark Choco", p: "7.00€ / 70.00€"}, {n: "Don Julio Blanco", p: "10.00€ / 100.00€"},
-          {n: "Don Julio Anejo", p: "13.00€ / 130.00€"}
-        ]
-      },
-      {
-        name: "Cognac / Metaxa",
-        items: [
-          {n: "Metaxa 3 Stars", p: "6.50€ / 65.00€"}, {n: "Metaxa 5 Stars", p: "7.00€ / 70.00€"},
-          {n: "Metaxa 7 Stars", p: "7.50€ / 75.00€"}, {n: "Metaxa Private Reserve", p: "17.00€ / 170.00€"},
-          {n: "Hennessy VS", p: "16.00€ / 160.00€"}, {n: "Courvoisier VS", p: "12.00€ / 120.00€"}
+          { name: "Jose Cuervo Blanco", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Jose Cuervo Reposado", variants: [{p: 7, l:{el:'Ποτήρι',en:'Glass'}}, {p: 70, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Don Julio Blanco", variants: [{p: 10, l:{el:'Ποτήρι',en:'Glass'}}, {p: 100, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Don Julio Anejo", variants: [{p: 13, l:{el:'Ποτήρι',en:'Glass'}}, {p: 130, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       }
     ]
   },
-
-  // 7. WINE LIST (FAVORITES ENABLED)
+  // 7. WINE
   {
-    id: 'wine', title: "Wine List", type: 'group', img: ASSETS.cat_wine,
+    id: 'wine', title: {el: "Λίστα Κρασιών", en: "Wine List"}, type: 'group', img: ASSETS.cat_wine,
     groups: [
       {
-        name: "White Wines (Glass / Bottle)",
+        name: {el: "Λευκά", en: "White"},
         items: [
-          {n: "Epops (Ktima Chatzigeorgiou)", p: "6.00€ / 22.00€"},
-          {n: "Malagouzia (Simeonidi)", p: "6.50€ / 23.00€"},
-          {n: "Tzoker (Lalikos)", p: "6.00€ / 22.00€"},
-          {n: "Chateau Nico Lazaridi", p: "23.00€"},
-          {n: "Thema (Pavlidis)", p: "26.00€"},
-          {n: "Julia Chateau", p: "26.00€"},
-          {n: "Ktima Biblia Chora", p: "28.00€"},
-          {n: "Dakry Ampelou", p: "29.00€"},
-          {n: "Magic Mountain", p: "35.00€"},
-          {n: "Santo Nychteri", p: "36.50€"}
+          { name: "Epops (Ktima Chatzigeorgiou)", variants: [{p: 6, l:{el:'Ποτήρι',en:'Glass'}}, {p: 22, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Malagouzia (Simeonidi)", variants: [{p: 6.5, l:{el:'Ποτήρι',en:'Glass'}}, {p: 23, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Biblia Chora", variants: [{p: 28, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Magic Mountain", variants: [{p: 35, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
-        name: "Red Wines (Glass / Bottle)",
+        name: {el: "Ερυθρά", en: "Red"},
         items: [
-          {n: "Epops", p: "6.30€ / 24.00€"},
-          {n: "Red Semi-Sweet", p: "5.80€ (Glass)"},
-          {n: "Thema (Pavlidis)", p: "27.00€"},
-          {n: "Simeonidis Merlot", p: "25.00€"},
-          {n: "Ktima Biblia Chora", p: "29.00€"},
-          {n: "Santorini Mavrotragano", p: "40.00€"},
-          {n: "Magic Mountain", p: "43.00€"},
-          {n: "Deka", p: "35.00€"}
+          { name: "Epops", variants: [{p: 6.3, l:{el:'Ποτήρι',en:'Glass'}}, {p: 24, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: {el: "Ερυθρός Ημίγλυκος", en: "Red Semi-Sweet"}, variants: [{p: 5.8, l:{el:'Ποτήρι',en:'Glass'}}] },
+          { name: "Biblia Chora", variants: [{p: 29, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Magic Mountain", variants: [{p: 43, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       },
       {
-        name: "Rose & Sparkling",
+        name: {el: "Ροζέ & Αφρώδη", en: "Rose & Sparkling"},
         items: [
-          {n: "Treis Magisses", p: "5.80€ / 21.00€"},
-          {n: "Kokkino Fili", p: "5.80€"},
-          {n: "Diva", p: "22.00€"},
-          {n: "Dune", p: "23.00€"},
-          {n: "Prosecco Cinzano", p: "5.50€ / 19.00€"},
-          {n: "Moscato D'Asti", p: "6.00€ / 22.00€"},
-          {n: "Asti Martini", p: "26.00€"},
-          {n: "Moet & Chandon", p: "120.00€"},
-          {n: "Sangria", p: "5.50€"}
+          { name: "Treis Magisses", variants: [{p: 5.8, l:{el:'Ποτήρι',en:'Glass'}}, {p: 21, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Prosecco Cinzano", variants: [{p: 5.5, l:{el:'Ποτήρι',en:'Glass'}}, {p: 19, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Moscato D'Asti", variants: [{p: 6, l:{el:'Ποτήρι',en:'Glass'}}, {p: 22, l:{el:'Φιάλη',en:'Bottle'}}] },
+          { name: "Moet & Chandon", variants: [{p: 120, l:{el:'Φιάλη',en:'Bottle'}}] }
         ]
       }
     ]
   },
-
-  // 8. BRUNCH & PANCAKES
+  // 8. BRUNCH
   {
-    id: 'brunch', title: "Brunch & Pancakes", type: 'card', img: ASSETS.cat_brunch,
+    id: 'brunch', title: {el: "Brunch & Πρωινό", en: "Brunch & Breakfast"}, type: 'card', img: ASSETS.cat_brunch,
     items: [
-      { name: "Whole Grain Sandwich", price: 2.50, desc: "Turkey, Mascarpone, Gouda, Lettuce" },
-      { name: "Ciabatta", price: 2.50, desc: "Mozzarella, Prosciutto, Rocca, Basil Pesto, Mascarpone" },
-      { name: "Baguettini", price: 2.50, desc: "Cherry tomato, Geremezi cheese, Olive paste, Lettuce" },
-      { name: "Toast", price: 3.50, desc: "Bread, Turkey/Ham, Cheese" },
-      { name: "Toast with Fries", price: 4.00, desc: "Served with french fries" },
-      { name: "Homemade Focaccia", price: 6.00, desc: "Peanut mortadela, peanut pesto, katiki cheese, rocca" },
-      { name: "Fried Eggs", price: 6.50, desc: "2 eggs, handmade kavourma, bread" },
-      { name: "Scrambled Eggs", price: 7.50, desc: "Feta, avocado, cherry tomatoes, matured bread", tags: ['veg'] },
-      { name: "Country Omelette", price: 6.50, desc: "Green peppers, tomato, potatoes, katiki cheese" },
-      { name: "Pancakes Savory", price: 7.00, desc: "Bacon, cheese, fried egg, hollandaise" },
-      { name: "Prosciutto Pancakes", price: 8.00, desc: "Fried egg, Metsovone cream, cherry tomatoes, carob" },
-      { name: "Chicken Pancakes", price: 8.50, desc: "Crispy bacon, cheddar sauce, corn, peppers, hollandaise" },
-      { name: "Pancakes Chocolate", price: 7.50, desc: "Hazelnut praline, biscuit", tags: ['popular'] },
-      { name: "Pancakes Bueno", price: 7.50, desc: "Bueno cream, crispy waffle" },
-      { name: "Pancakes Ferrero", price: 8.00, desc: "Ferrero praline, hazelnuts, cocoa" },
-      { name: "Banoffee Pancakes", price: 8.00, desc: "Caramelized bananas, dulce de leche, biscuit, salted caramel" },
-      { name: "Waffle Chocolate", price: 6.00, desc: "Praline, biscuit" },
-      { name: "Waffle Bueno", price: 6.00, desc: "Bueno cream, crispy waffle" }
+      { name: "Whole Grain Sandwich", price: 2.50 },
+      { name: "Ciabatta", price: 2.50 },
+      { name: "Toast", price: 3.50 },
+      { name: {el: "Αυγά Τηγανητά", en: "Fried Eggs"}, price: 6.50 },
+      { name: "Scrambled Eggs", price: 7.50, tags: ['veg'] },
+      { name: "Pancakes Savory", price: 7.00 },
+      { name: "Chicken Pancakes", price: 8.50 },
+      { name: "Pancakes Chocolate", price: 7.50, tags: ['popular'] },
+      { name: "Pancakes Bueno", price: 7.50 }
     ]
   },
-
-  // 9. COFFEE & TEA
+  // 9. COFFEE
   {
-    id: 'coffee', title: "Coffee & Tea", type: 'list', img: ASSETS.cat_coffee,
+    id: 'coffee', title: {el: "Καφές & Ροφήματα", en: "Coffee & Beverages"}, type: 'list', img: ASSETS.cat_coffee,
     items: [
-      { name: "Espresso", price: 2.50 }, { name: "Espresso Double", price: 3.00 },
-      { name: "Espresso Americano", price: 3.00 }, { name: "Espresso Americano Double", price: 3.50 },
-      { name: "Espresso Macchiato", price: 3.00 }, { name: "Espresso Macchiato Double", price: 3.50 },
-      { name: "Espresso Con Panna", price: 3.50 }, { name: "Espresso Con Panna Double", price: 4.00 },
-      { name: "Cappuccino", price: 3.80 }, { name: "Cappuccino Double", price: 4.30 },
-      { name: "Cappuccino Latte", price: 4.00 },
-      { name: "Nescafe", price: 3.00 }, { name: "Greek Coffee", price: 2.50 },
-      { name: "Greek Coffee Double", price: 3.00 },
-      { name: "Filter Coffee", price: 3.00 },
-      { name: "Filter Flavored", price: 3.50, desc: "Hazelnut, Caramel, Vanilla" },
-      { name: "Espresso Cold", price: 3.50 },
-      { name: "Cappuccino Cold", price: 4.00 },
-      { name: "Cappuccino Cold Crema", price: 4.20 },
-      { name: "Nescafe Frappe", price: 3.00 },
-      { name: "Nescafe Ice Cream Frappe", price: 4.50 },
-      { name: "Mochaccino Hot", price: 4.50 }, { name: "Mochaccino Cold", price: 4.50 },
-      { name: "Irish Coffee", price: 6.00 }, { name: "Baileys Blink", price: 6.00 },
-      { name: "Espresso Affogato", price: 5.00 }, { name: "Espresso Corretto", price: 4.50 },
-      { name: "Chocolate Classic", price: 4.00 },
-      { name: "Chocolate Flavors", price: 4.20, desc: "Strawberry, Hazelnut, Banana, Coconut, White" },
-      { name: "Tea (Hot)", price: 3.00, desc: "Green, Black, Mountain, Chamomile, Mint, Cinnamon, Rose" },
-      { name: "Tea (Cold)", price: 3.00, desc: "Lemon, Peach, Green, Melon, Forest Fruits" },
-      { name: "Fresh Juice", price: 4.00, desc: "Orange, Pomegranate, Seasonal" },
-      { name: "Homemade Lemonade", price: 4.00, desc: "Ginger or Mastic" }
+      { name: "Espresso", price: 2.50 },
+      { name: {el: "Espresso Διπλός", en: "Espresso Double"}, price: 3.00 },
+      { name: "Cappuccino", price: 3.80 },
+      { name: "Freddo Espresso", price: 3.50 },
+      { name: "Freddo Cappuccino", price: 4.00 },
+      { name: {el: "Ελληνικός", en: "Greek Coffee"}, price: 2.50 },
+      { name: {el: "Σοκολάτα", en: "Chocolate"}, price: 4.00 },
+      { name: {el: "Τσάι", en: "Tea"}, price: 3.00 }
     ]
   },
-
-  // 10. BEERS
+  // 10. BEER
   {
-    id: 'beer', title: "Beers", type: 'list', img: ASSETS.cat_beer,
+    id: 'beer', title: {el: "Μπύρες", en: "Beers"}, type: 'list', img: ASSETS.cat_beer,
     items: [
       { name: "Mythos Draft 300ml", price: 3.50 }, { name: "Mythos Draft 400ml", price: 4.50 },
-      { name: "Mythos Pitcher 1lt", price: 12.00 },
       { name: "Kaiser Draft 300ml", price: 4.00 }, { name: "Kaiser Draft 400ml", price: 5.00 },
-      { name: "Kaiser Pitcher 1lt", price: 13.00 },
-      { name: "Fix / Fix Dark", price: 4.00 },
-      { name: "Corona / Stella", price: 5.00 },
-      { name: "McFarland", price: 5.50 }, { name: "Guinness", price: 6.00 },
-      { name: "Nissos All Day", price: 6.00, desc: "Gluten Free", tags: ['gf'] },
-      { name: "Cider (Apple/Mango)", price: 5.50 }
+      { name: "Corona", price: 5.00 }, { name: "McFarland", price: 5.50 }, { name: "Guinness", price: 6.00 }
     ]
   },
-
-  // 11. DESSERTS & REFRESH
+  // 11. DESSERT
   {
-    id: 'dessert', title: "Desserts & Refresh", type: 'list', img: ASSETS.cat_dessert,
+    id: 'dessert', title: {el: "Γλυκά", en: "Desserts"}, type: 'list', img: ASSETS.cat_dessert,
     items: [
-      { name: "Cheesecake", price: 5.00, desc: "Black Cherry" },
-      { name: "Chocolate Mousse", price: 5.00 },
-      { name: "Pecan Pie Magic", price: 5.00 },
-      { name: "Souffle Chocolate", price: 5.50 },
-      { name: "Souffle with Ice Cream", price: 7.00 },
-      { name: "Apple Pie", price: 5.00 },
-      { name: "Chocolate Sphere", price: 9.00, desc: "Dark chocolate, crispy waffle, dried raspberries, salty caramel", tags: ['popular'] },
-      { name: "1000 Leaves", price: 9.00, desc: "Crispy Beirut pastry, namelaka tonka" },
-      { name: "Smoothies", price: 6.00, desc: "Caribbean, Forest, Tropical, Strawberry" },
-      { name: "Super Protein", price: 6.50, desc: "Pomegranate, strawberry, hemp seeds, spirulina", tags: ['vegan'] },
-      { name: "Granitas", price: 4.50, desc: "Strawberry, Lemon" },
-      { name: "Milkshake", price: 5.00, desc: "Vanilla, Chocolate, Strawberry" },
-      { name: "Soft Drinks", price: 3.00 },
-      { name: "Red Bull / Monster", price: 5.00 }
+      { name: "Cheesecake", price: 5.00 }, { name: "Chocolate Mousse", price: 5.00 },
+      { name: "Souffle", price: 5.50 }, { name: "Chocolate Sphere", price: 9.00, tags: ['popular'] }
     ]
   }
 ];
 
-// --- HELPERS ---
-const renderPrice = (p) => {
-  if (typeof p === 'number') return `€${p.toFixed(2)}`;
-  return p; // Used for "7.00€ / 70.00€" strings
+// --- HELPER: SAFE TRANSLATION ---
+const txt = (val, lang) => {
+  if (!val) return "";
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object' && val[lang]) return val[lang];
+  return val['en'] || val['el'] || "";
+};
+
+// --- CORRECTED PRICE DISPLAY FUNCTION ---
+const displayPrice = (item) => {
+  if (item.variants && item.variants.length > 0) {
+      if (item.variants.length === 1) {
+          return `€${item.variants[0].p.toFixed(2)}`;
+      }
+      return `€${item.variants[0].p} / €${item.variants[1].p}`;
+  }
+  if (item.price) return `€${item.price.toFixed(2)}`;
+  return "";
 };
 
 const renderTags = (tags) => {
@@ -380,100 +327,142 @@ const renderTags = (tags) => {
       {tags.includes('vegan') && <span className="diet-tag tag-vegan"><Leaf size={10}/> VEGAN</span>}
       {tags.includes('gf') && <span className="diet-tag tag-vegan">GF</span>}
       {tags.includes('popular') && <span className="diet-tag tag-pop"><Star size={10}/> POP</span>}
-      {tags.includes('0%') && <span className="diet-tag tag-pop">0% ALC</span>}
+      {tags.includes('0%') && <span className="diet-tag tag-pop">0%</span>}
     </div>
   );
 };
 
-// --- COMPONENTS ---
-
-// Reviews Slider (Public)
-const ReviewsSlider = () => {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setIdx(prev => (prev + 1) % REVIEWS.length), 4000);
-    return () => clearInterval(timer);
-  }, []);
-  return (
-    <div className="reviews-slider">
-      <div className="stars">{'★'.repeat(REVIEWS[idx].stars)}</div>
-      <p>"{REVIEWS[idx].text}"</p>
-      <span>- {REVIEWS[idx].user}</span>
-    </div>
-  );
-};
-
-// Sommelier (Quiz)
-const SommelierQuiz = ({ onClose, onResult }) => {
-  const [step, setStep] = useState(0);
-  
-  const questions = [
-    { q: "Τι διάθεση έχεις;", opts: [{t: "Party 🍹", v: 'party'}, {t: "Chill ☕", v: 'chill'}] },
-    { q: "Τι γεύση προτιμάς;", opts: [{t: "Γλυκό 🍓", v: 'sweet'}, {t: "Ξινό / Πικρό 🍋", v: 'sour'}] },
-    { q: "Πόσο δυνατό;", opts: [{t: "Ελαφρύ", v: 'light'}, {t: "Δυνατό 💪", v: 'strong'}] }
-  ];
-
-  const handleAnswer = () => {
-    if (step < 2) setStep(step + 1);
-    else {
-      onResult("Δοκίμασε το 'Paseo Sunset'!");
-      onClose();
-    }
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="quiz-modal fade-in-up">
-        <h3>Digital Sommelier 🍷</h3>
-        <p>{questions[step].q}</p>
-        <div className="quiz-opts">
-          {questions[step].opts.map((o, i) => (
-            <button key={i} onClick={handleAnswer}>{o.t}</button>
-          ))}
-        </div>
-        <button className="close-quiz" onClick={onClose}>Κλείσιμο</button>
+// --- MODAL FOR VARIANTS ---
+const VariantModal = ({ item, onClose, onSelect, lang }) => (
+  <div className="modal-overlay">
+    <div className="variant-box fade-in-up">
+      <h3>{txt(item.name, lang)}</h3>
+      <p>{UI[lang].choose}:</p>
+      <div className="variant-options">
+        {item.variants.map((v, i) => (
+          <button key={i} onClick={() => onSelect(v)} className="variant-btn">
+            <span>{txt(v.l, lang)}</span>
+            <span className="var-price">€{v.p.toFixed(2)}</span>
+          </button>
+        ))}
       </div>
+      <button onClick={onClose} className="close-link">{UI[lang].closed || "Close"}</button>
     </div>
-  );
-};
+  </div>
+);
 
-// --- PAGES ---
+// --- COMPONENT: COCKTAIL SOMMELIER ---
+const CocktailSommelier = ({ lang }) => {
+    const [step, setStep] = useState(0); // 0: Start, 1: Alcohol, 2: Flavor, 3: Base, 4: Results
+    const [pref, setPref] = useState({ alcohol: true, flavor: '', base: '' });
+    const [results, setResults] = useState([]);
 
-// 1. PUBLIC SITE
-function PublicSite() {
-  const navigate = useNavigate();
-  return (
-    <div className="public-root">
-      <div className="bg-image" style={{backgroundImage: `url(${ASSETS.heroImage})`}}>
-        <div className="overlay"></div>
-      </div>
+    const handleStart = () => setStep(1);
 
-      <div className="public-content">
-        <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-main" alt="Logo"/>
-        <h2 className="tagline">PREMIUM LOUNGE EXPERIENCE</h2>
+    const handleAlcohol = (hasAlcohol) => {
+        setPref({ ...pref, alcohol: hasAlcohol });
+        if (!hasAlcohol) {
+            setResults(SOMMELIER_DB.mocktails);
+            setStep(4);
+        } else {
+            setStep(2);
+        }
+    };
+
+    const handleFlavor = (flavor) => {
+        setPref({ ...pref, flavor });
+        setStep(3);
+    };
+
+    const handleBase = (base) => {
+        setPref({ ...pref, base });
+        calculate(pref.flavor, base);
+    };
+
+    const calculate = (flavor, base) => {
+        let list = SOMMELIER_DB.cocktails.filter(c => {
+            if (c.type !== flavor) return false;
+            if (base === 'any') return true;
+            if (c.base === 'all' || c.base === 'other') return true;
+            return c.base === base;
+        });
         
-        <ReviewsSlider />
+        // Fallback
+        if (list.length === 0) {
+            list = SOMMELIER_DB.cocktails.filter(c => c.type === flavor);
+        }
 
-        <div className="info-box secret-trigger" onClick={() => navigate('/qr-menu')}>
-           <Clock size={24} color="#C5A065"/>
-           <p>Daily 08:00 - 03:00</p>
-           <span className="status-badge open">OPEN NOW</span>
+        // Randomize and take 3
+        const shuffled = list.sort(() => 0.5 - Math.random());
+        setResults(shuffled.slice(0, 3));
+        setStep(4);
+    };
+
+    const restart = () => {
+        setStep(0);
+        setResults([]);
+        setPref({ alcohol: true, flavor: '', base: '' });
+    };
+
+    // UI RENDERING
+    return (
+        <div className="sommelier-container">
+            <h2 className="som-title"><Sparkles size={18}/> {step === 0 ? UI[lang].sommelier_title : "Sommelier"}</h2>
+            
+            {step === 0 && (
+                <div className="som-step fade-in">
+                    <p>{UI[lang].sommelier_desc}</p>
+                    <button className="som-btn-start" onClick={handleStart}>{UI[lang].sommelier_btn}</button>
+                </div>
+            )}
+
+            {step === 1 && (
+                <div className="som-step fade-in">
+                    <p className="q-text">1. {lang === 'el' ? "Θέλεις Αλκοόλ;" : "Do you want Alcohol?"}</p>
+                    <button className="som-btn" onClick={() => handleAlcohol(true)}>{lang === 'el' ? "Ναι, με αλκοόλ" : "Yes, with alcohol"}</button>
+                    <button className="som-btn" onClick={() => handleAlcohol(false)}>{lang === 'el' ? "Όχι, Alcohol Free" : "No, Alcohol Free"}</button>
+                </div>
+            )}
+
+            {step === 2 && (
+                <div className="som-step fade-in">
+                    <p className="q-text">2. {lang === 'el' ? "Τι γεύση προτιμάς;" : "What flavors do you like?"}</p>
+                    <button className="som-btn" onClick={() => handleFlavor('sweet')}>{lang === 'el' ? "Γλυκό & Φρουτώδες" : "Sweet & Fruity"}</button>
+                    <button className="som-btn" onClick={() => handleFlavor('sour')}>{lang === 'el' ? "Ξινό & Δροσερό" : "Sour & Refreshing"}</button>
+                    <button className="som-btn" onClick={() => handleFlavor('bitter')}>{lang === 'el' ? "Πικρό & Στιβαρό" : "Bitter & Dry"}</button>
+                    <button className="som-btn" onClick={() => handleFlavor('strong')}>{lang === 'el' ? "Πολύ Δυνατό / Spicy" : "Strong / Spicy"}</button>
+                </div>
+            )}
+
+            {step === 3 && (
+                <div className="som-step fade-in">
+                    <p className="q-text">3. {lang === 'el' ? "Αγαπημένη βάση;" : "Favorite Spirit?"}</p>
+                    <button className="som-btn" onClick={() => handleBase('rum')}>{lang === 'el' ? "Ρούμι (Rum)" : "Rum"}</button>
+                    <button className="som-btn" onClick={() => handleBase('vodka')}>{lang === 'el' ? "Βότκα (Vodka)" : "Vodka"}</button>
+                    <button className="som-btn" onClick={() => handleBase('gin')}>{lang === 'el' ? "Τζιν (Gin)" : "Gin"}</button>
+                    <button className="som-btn" onClick={() => handleBase('tequila')}>{lang === 'el' ? "Τεκίλα (Tequila)" : "Tequila"}</button>
+                    <button className="som-btn" onClick={() => handleBase('whiskey')}>{lang === 'el' ? "Ουίσκι (Whiskey)" : "Whiskey"}</button>
+                    <button className="som-btn" onClick={() => handleBase('any')}>{lang === 'el' ? "Όλα (Any)" : "Any"}</button>
+                </div>
+            )}
+
+            {step === 4 && (
+                <div className="som-results fade-in-up">
+                    <p className="q-text">{lang === 'el' ? "Σου προτείνουμε:" : "We recommend:"}</p>
+                    {results.map((drink, idx) => (
+                        <div key={idx} className="som-card">
+                            <h4>{drink.name}</h4>
+                            <p>{txt(drink.ingredients, lang)}</p>
+                        </div>
+                    ))}
+                    <button className="restart-link" onClick={restart}>{lang === 'el' ? "Πάμε πάλι;" : "Try again?"}</button>
+                </div>
+            )}
         </div>
+    );
+};
 
-        <div className="action-buttons">
-           <a href="tel:+302510834378" className="btn-gold">ΚΡΑΤΗΣΗ / BOOK NOW</a>
-           <div className="social-row">
-              <a href="https://www.instagram.com/paseoloungebar/" className="social-btn"><Instagram/></a>
-              <a href="https://www.facebook.com/PASEOLOUNGEBAR/" className="social-btn"><MessageCircle/></a>
-              <a href="http://maps.google.com/?q=Paseo+Lounge+Bar+Kavala" className="social-btn"><Map/></a>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 2. QR MENU APP
+// --- MAIN APP ---
 function SecretMenu() {
   const [mood, setMood] = useState(null);
   const [category, setCategory] = useState(null);
@@ -481,23 +470,40 @@ function SecretMenu() {
   const [showMyList, setShowMyList] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState(null);
   const [toast, setToast] = useState(null);
-  const [showQuiz, setShowQuiz] = useState(false);
+  const [lang, setLang] = useState('el');
+  const [variantItem, setVariantItem] = useState(null);
 
-  const toggleFav = (item) => {
+  const handleFavClick = (item) => {
+    if (item.variants) setVariantItem(item);
+    else toggleFav(item);
+  };
+
+  const toggleFav = (item, variant = null) => {
+    const itemName = txt(item.name, lang);
+    const variantLabel = variant ? txt(variant.l, lang) : "";
+    const cartName = variant ? `${itemName} (${variantLabel})` : itemName;
+    const cartPrice = variant ? variant.p : item.price;
+
     setFavorites(prev => {
-      const exists = prev.find(i => i.name === item.name);
+      const exists = prev.find(i => i.cartName === cartName);
       if (exists) {
-        showToast(`${item.name} removed`);
-        return prev.filter(i => i.name !== item.name);
+        showToast(`${cartName} removed`);
+        return prev.filter(i => i.cartName !== cartName);
       }
-      showToast(`${item.name} added!`);
-      return [...prev, item];
+      showToast(`${cartName} added!`);
+      return [...prev, { ...item, cartName, realPrice: cartPrice }];
     });
+    setVariantItem(null);
+  };
+
+  const removeFromFav = (cartNameToRemove) => {
+    setFavorites(prev => prev.filter(i => i.cartName !== cartNameToRemove));
+    showToast("Removed");
   };
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 2000);
+    setTimeout(() => setToast(null), 1500);
   };
 
   const MobileWrapper = ({ children }) => (
@@ -505,60 +511,71 @@ function SecretMenu() {
       <div className="menu-phone-frame">
         {children}
         {toast && <div className="toast-notification">{toast}</div>}
-        {showQuiz && <SommelierQuiz onClose={() => setShowQuiz(false)} onResult={showToast} />}
+        {variantItem && <VariantModal item={variantItem} onClose={() => setVariantItem(null)} onSelect={(v) => toggleFav(variantItem, v)} lang={lang}/>}
       </div>
     </div>
   );
 
-  // VIEW: MOOD SELECTOR
+  // 1. MOOD / HOME
   if (!mood) {
     return (
       <MobileWrapper>
         <div className="menu-content mood-bg">
-           <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-small" alt="logo"/>
-           <h1 className="mood-title">Choose your Vibe</h1>
-           <div className="mood-cards">
-              <div className="mood-card" onClick={() => setMood('day')}><Coffee size={30} color="#C5A065"/><h3>Day & Brunch</h3></div>
-              <div className="mood-card" onClick={() => setMood('night')}><Martini size={30} color="#C5A065"/><h3>Night & Drinks</h3></div>
-              <div className="mood-card full" onClick={() => setMood('all')}><List size={30} color="#C5A065"/><h3>Full Menu</h3></div>
+           <div className="top-bar-actions">
+             <button onClick={() => setLang(lang === 'en' ? 'el' : 'en')} className="lang-btn"><Globe size={14}/> {lang.toUpperCase()}</button>
+           </div>
+           <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-small"/>
+           <h1 className="mood-title">{UI[lang].vibe}</h1>
+           
+           <div className="grid-menu">
+             <div className="grid-item" onClick={() => setMood('coffee')} style={{backgroundImage:`url(${ASSETS.grid_coffee})`}}><span>{UI[lang].t_coffee}</span></div>
+             <div className="grid-item" onClick={() => setMood('food')} style={{backgroundImage:`url(${ASSETS.grid_food})`}}><span>{UI[lang].t_food}</span></div>
+             <div className="grid-item" onClick={() => setMood('drinks')} style={{backgroundImage:`url(${ASSETS.grid_cocktails})`}}><span>{UI[lang].t_drinks}</span></div>
+             <div className="grid-item" onClick={() => setMood('wine')} style={{backgroundImage:`url(${ASSETS.grid_wine})`}}><span>{UI[lang].t_wine}</span></div>
            </div>
            
-           <button className="quiz-trigger" onClick={() => setShowQuiz(true)}>
-             <Sparkles size={16}/> Δεν ξέρεις τι να πάρεις;
-           </button>
+           <button className="btn-full-menu" onClick={() => setMood('all')}>{UI[lang].full}</button>
+           
+           {/* COCKTAIL SOMMELIER INSERTED HERE */}
+           <CocktailSommelier lang={lang} />
+
         </div>
       </MobileWrapper>
     );
   }
 
-  // VIEW: MY LIST
+  // 2. MY LIST
   if (showMyList) {
+     const total = favorites.reduce((sum, i) => sum + (i.realPrice || 0), 0);
      return (
       <MobileWrapper>
         <div className="menu-content list-view">
            <div className="sticky-header">
               <button onClick={() => setShowMyList(false)} className="icon-btn"><X/></button>
-              <h2>My Selection</h2><div style={{width: 24}}></div>
+              <h2>{UI[lang].myList}</h2><div style={{width: 24}}></div>
            </div>
            <div className="list-scroll">
-              {favorites.length === 0 ? <p className="empty-state">Η λίστα είναι άδεια.</p> : favorites.map((item, idx) => (
+              {favorites.length === 0 ? <p className="empty-state">{UI[lang].empty}</p> : favorites.map((item, idx) => (
                  <div key={idx} className="order-item">
-                    <div className="order-info"><h4>{item.name}</h4><span>{renderPrice(item.price)}</span></div>
-                    <button onClick={() => toggleFav(item)} className="remove-btn"><X size={14}/></button>
+                    <div className="order-info"><h4>{item.cartName}</h4><span>€{item.realPrice.toFixed(2)}</span></div>
+                    <button onClick={() => removeFromFav(item.cartName)} className="remove-btn"><X size={14}/></button>
                  </div>
               ))}
+              <div className="total-row"><span>{UI[lang].total}:</span><span>€{total.toFixed(2)}</span></div>
            </div>
         </div>
       </MobileWrapper>
      )
   }
 
-  // VIEW: CATEGORY SELECT
+  // 3. CATEGORY
   if (!category) {
      const visibleCats = MENU_DATA.filter(cat => {
         if(mood === 'all') return true;
-        if(mood === 'day') return ['coffee', 'brunch', 'dessert', 'food', 'starters'].includes(cat.id);
-        if(mood === 'night') return ['signatures', 'classics', 'spirits', 'wine', 'beer', 'food', 'starters', 'dessert'].includes(cat.id);
+        if(mood === 'coffee') return ['coffee', 'brunch', 'dessert'].includes(cat.id);
+        if(mood === 'food') return ['food', 'starters', 'main', 'brunch'].includes(cat.id);
+        if(mood === 'drinks') return ['signatures', 'classics', 'beer'].includes(cat.id);
+        if(mood === 'wine') return ['wine', 'spirits'].includes(cat.id);
         return true;
      });
 
@@ -567,23 +584,22 @@ function SecretMenu() {
         <div className="menu-content">
            <div className="sticky-header">
               <button onClick={() => setMood(null)} className="icon-btn"><ChevronDown/></button>
-              <span className="header-title">MENU</span>
+              <span className="header-title">{UI[lang].menu}</span>
               <button onClick={() => setShowMyList(true)} className="icon-btn relative">
                  <Heart fill={favorites.length > 0 ? "#C5A065" : "none"} color="#C5A065"/>
                  {favorites.length > 0 && <span className="badge">{favorites.length}</span>}
               </button>
            </div>
            
-           {/* RATE US BUTTON (MOVED HERE) */}
            <div className="review-area">
-             <a href="https://search.google.com/local/writereview?placeid=YOUR_ID" target="_blank" className="btn-gold small">
-               <Star size={12} fill="black"/> Αξιολογήστε μας
+             <a href="https://www.google.com/search?q=Paseo+Lounge+Bar+Reviews" target="_blank" className="btn-gold small">
+               <Star size={12} fill="black"/> {UI[lang].review}
              </a>
            </div>
 
            <div className="cat-grid">
               {visibleCats.map(cat => (
-                 <div key={cat.id} className="cat-card" onClick={() => setCategory(cat)} style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(${cat.img})`}}><h3>{cat.title}</h3></div>
+                 <div key={cat.id} className="cat-card" onClick={() => setCategory(cat)} style={{backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(${cat.img})`}}><h3>{txt(cat.title, lang)}</h3></div>
               ))}
            </div>
         </div>
@@ -591,45 +607,55 @@ function SecretMenu() {
      );
   }
 
-  // VIEW: ITEMS LIST
+  // 4. ITEMS
   return (
    <MobileWrapper>
      <div className="menu-content">
         <div className="cat-header-hero" style={{backgroundImage: `url(${category.img})`}}>
            <div className="overlay-grad">
               <button onClick={() => setCategory(null)} className="back-bubble"><ChevronRight style={{transform:'rotate(180deg)'}}/></button>
-              <h1>{category.title}</h1>
+              <h1>{txt(category.title, lang)}</h1>
            </div>
         </div>
         <div className="items-scroll">
+           
            {category.type === 'card' && <div className="cards-stack">{category.items.map((item, i) => (
               <div key={i} className="menu-card">
                  {item.ribbon && <div className="ribbon">{item.ribbon}</div>}
-                 <div className="card-details"><h4>{item.name} {renderTags(item.tags)}</h4><p>{item.desc}</p><span className="price">{renderPrice(item.price)}</span></div>
-                 <button className="fav-btn" onClick={() => toggleFav(item)}><Heart size={20} fill={favorites.find(f=>f.name===item.name) ? "#C5A065" : "none"} color="#C5A065"/></button>
+                 <div className="card-details">
+                   <h4>{txt(item.name, lang)} {renderTags(item.tags)}</h4>
+                   <p>{txt(item.desc, lang)}</p>
+                   <span className="price">{displayPrice(item)}</span>
+                 </div>
+                 <button className="fav-btn" onClick={() => handleFavClick(item)}>
+                   <Heart size={20} fill={favorites.some(f => f.name === item.name) ? "#C5A065" : "none"} color="#C5A065"/>
+                 </button>
               </div>
            ))}</div>}
            
            {category.type === 'list' && <div className="list-stack">{category.items.map((item, i) => (
               <div key={i} className="menu-list-item">
-                 <div className="list-text"><h4>{item.name} {renderTags(item.tags)}</h4>{item.desc && <p>{item.desc}</p>}</div>
+                 <div className="list-text"><h4>{txt(item.name, lang)} {renderTags(item.tags)}</h4>{item.desc && <p>{txt(item.desc, lang)}</p>}</div>
                  <div className="list-right">
-                   <span className="price">{renderPrice(item.price)}</span>
-                   <button className="fav-mini" onClick={() => toggleFav(item)}><Heart size={16} fill={favorites.find(f=>f.name===item.name) ? "#C5A065" : "none"} color="#C5A065"/></button>
+                   <span className="price">{displayPrice(item)}</span>
+                   <button className="fav-mini" onClick={() => handleFavClick(item)}><Heart size={16} fill={favorites.some(f => f.name === item.name) ? "#C5A065" : "none"} color="#C5A065"/></button>
                  </div>
               </div>
            ))}</div>}
            
            {category.type === 'group' && <div className="group-stack">{category.groups.map((grp, i) => (
               <div key={i} className="accordion">
-                 <div className="accordion-header" onClick={() => setExpandedGroup(expandedGroup === grp.name ? null : grp.name)}><span>{grp.name}</span>{expandedGroup === grp.name ? <ChevronUp/> : <ChevronDown/>}</div>
+                 <div className="accordion-header" onClick={() => setExpandedGroup(expandedGroup === grp.name ? null : grp.name)}>
+                   <span>{txt(grp.name, lang)}</span>{expandedGroup === grp.name ? <ChevronUp/> : <ChevronDown/>}
+                 </div>
                  {expandedGroup === grp.name && <div className="accordion-body">{grp.items.map((item, idx) => (
                     <div key={idx} className="simple-row-price">
-                      <span>{item.n}</span>
-                      <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                        <span className="price-tag">{item.p}</span>
-                        {/* ENABLED FAVORITES FOR GROUPS (WINE/SPIRITS) */}
-                        <button className="fav-mini" onClick={() => toggleFav({name: item.n, price: 0})}><Heart size={14} fill={favorites.find(f=>f.name===item.n) ? "#C5A065" : "none"} color="#C5A065"/></button>
+                      <span>{txt(item.name, lang)}</span>
+                      <div className="row-end">
+                        <span className="price-tag">{displayPrice(item)}</span>
+                        <button className="fav-mini" onClick={() => handleFavClick(item)}>
+                          <Heart size={14} fill={favorites.some(f => f.name === item.name) ? "#C5A065" : "none"} color="#C5A065"/>
+                        </button>
                       </div>
                     </div>
                  ))}</div>}
@@ -637,9 +663,58 @@ function SecretMenu() {
            ))}</div>}
         </div>
         
-        {favorites.length > 0 && <div className="floating-bar" onClick={() => setShowMyList(true)}><span>Selection ({favorites.length})</span><ChevronUp size={16}/></div>}
+        {favorites.length > 0 && <div className="floating-bar" onClick={() => setShowMyList(true)}><span>{UI[lang].myList} ({favorites.length})</span><ChevronUp size={16}/></div>}
      </div>
    </MobileWrapper>
+  );
+}
+
+// --- PUBLIC SITE ---
+const ReviewsSlider = () => {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setIdx(prev => (prev + 1) % 3), 4000);
+    return () => clearInterval(timer);
+  }, []);
+  const revs = [
+    { u: "Maria K.", t: "Best cocktails in Kavala!", s: 5 },
+    { u: "John D.", t: "Amazing atmosphere.", s: 5 },
+    { u: "Elena P.", t: "Great brunch.", s: 5 }
+  ];
+  return (
+    <div className="reviews-slider">
+      <div className="stars">{'★'.repeat(revs[idx].s)}</div>
+      <p>"{revs[idx].t}"</p>
+      <span>- {revs[idx].u}</span>
+    </div>
+  );
+};
+
+function PublicSite() {
+  const navigate = useNavigate();
+  return (
+    <div className="public-root">
+      <div className="bg-image" style={{backgroundImage: `url(${ASSETS.heroImage})`}}><div className="overlay"></div></div>
+      <div className="public-content">
+        <img src="https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png" className="logo-main"/>
+        <h2 className="tagline">PREMIUM LOUNGE EXPERIENCE</h2>
+        <ReviewsSlider />
+        <div className="info-box secret-trigger" onClick={() => navigate('/qr-menu')}>
+           <Clock size={24} color="#C5A065"/><p>Daily 08:00 - 03:00</p><span className="status-badge open">OPEN NOW</span>
+        </div>
+        <div className="action-buttons">
+           <a href="tel:+302510834378" className="btn-gold">BOOK NOW</a>
+           <div className="social-row">
+              <a href="https://www.instagram.com/paseoloungebar/" className="social-btn"><Instagram/></a>
+              <a href="https://www.facebook.com/PASEOLOUNGEBAR/" className="social-btn"><MessageCircle/></a>
+              <a href="http://maps.google.com/?q=Paseo+Lounge+Bar+Kavala" className="social-btn"><Map/></a>
+           </div>
+        </div>
+        <div className="footer-note">
+          <a href="https://www.google.com/search?q=Paseo+Lounge+Bar+Reviews" target="_blank" style={{color:'#888', fontSize:'11px', textDecoration:'underline'}}>Rate us on Google</a>
+        </div>
+      </div>
+    </div>
   );
 }
 
