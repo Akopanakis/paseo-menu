@@ -1,0 +1,20 @@
+{
+    "short_name": "Paseo",
+    "name": "Paseo Lounge Bar",
+    "icons": [
+      {
+        "src": "https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "https://i.postimg.cc/mDgLLyBY/Paseo-Logo-Transparent.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#000000"
+  }
