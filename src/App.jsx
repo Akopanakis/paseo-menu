@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Heart, X, ChevronDown, ChevronUp, Clock, Star, Map, Instagram, MessageCircle, Globe, ChevronRight, Flame, Leaf, Wine, Sparkles } from 'lucide-react';
+import { Heart, X, ChevronDown, ChevronUp, Clock, Star, Map, Instagram, MessageCircle, Globe, ChevronRight, Flame, Leaf, Sparkles } from 'lucide-react';
 import './App.css';
 
-// --- ASSETS (High Quality Dark Aesthetic) ---
+// --- ASSETS ---
 const ASSETS = {
   heroImage: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1080",
-  // 4+1 GRID IMAGES
   grid_coffee: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
   grid_food: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80", 
   grid_cocktails: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600&q=80",
   grid_wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80",
-  
-  // CATEGORY HEADERS
   cat_coffee: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600",
   cat_brunch: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600",
   cat_food: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600",
@@ -75,7 +72,7 @@ const SOMMELIER_DB = {
     ]
 };
 
-// --- MENU DATA (EXISTING) ---
+// --- MENU DATA ---
 const MENU_DATA = [
   // 1. STARTERS
   {
@@ -136,28 +133,43 @@ const MENU_DATA = [
       { name: {el: "Πιατέλα Αλλαντικών", en: "Cold Cuts Platter"}, price: 14.00, desc: {el: "4 ατόμων", en: "4 persons"} }
     ]
   },
-  // 4. SIGNATURES
+  // 4. SIGNATURES & SPECIALS
   {
-    id: 'signatures', title: { el: "Signature Cocktails", en: "Signature Cocktails" }, type: 'card', img: ASSETS.cat_cocktail,
+    id: 'signatures', title: { el: "Signature & Special", en: "Signature & Special" }, type: 'card', img: ASSETS.cat_cocktail,
     items: [
-      { name: "Zombie", price: 10.00, desc: {el: "Blend ρούμι, Ανανάς, Πάθος, Φωτιά", en: "Rum blend, Pineapple, Passion Fruit, Fire"}, tags: ['strong'], ribbon: "Best Seller" },
-      { name: "Mai Tai", price: 10.00, desc: {el: "Blend ρούμι, Αμύγδαλο, Λάιμ", en: "Rum blend, Almond, Lime"} },
-      { name: "Paseo Sunset", price: 10.00, desc: {el: "Βότκα, Φράουλα, Βανίλια, Λάιμ", en: "Vodka, Strawberry, Vanilla"}, tags: ['popular', 'sweet'], ribbon: "Signature" },
+      { name: "Zombie", price: 10.00, desc: {el: "Blend ρούμι, Μπράντυ, Ανανάς, Πορτοκάλι, Γρεναδίνη, Λάιμ", en: "Rum blend, Brandy, Pineapple, Orange, Grenadine, Lime"}, tags: ['strong'], ribbon: "Best Seller" },
+      { name: "Mai Tai", price: 10.00, desc: {el: "Λευκό & Μαύρο Ρούμι, Λικέρ Πορτοκάλι & Αμυγδάλου, Λάιμ", en: "White & Dark Rum, Orange & Almond liqueur, Lime"} },
+      { name: "Stoly Kiss", price: 9.00, desc: {el: "Βότκα, Λικέρ Μαστίχας, Κράνμπερι, Πουρές ρόδι, Λεμόνι", en: "Vodka, Mastic liqueur, Cranberry, Pomegranate, Lemon"} },
+      { name: "Paseo Sunset", price: 10.00, desc: {el: "Βότκα, Φράουλα, Βανίλια, Λάιμ", en: "Vodka, Strawberry, Vanilla, Lime"}, tags: ['popular', 'sweet'], ribbon: "Signature" },
       { name: "Spicy Mango", price: 10.00, desc: {el: "Τεκίλα, Μάνγκο, Τσίλι", en: "Tequila, Mango, Chili"}, tags: ['spicy'] },
-      { name: "Stoly Kiss", price: 9.00, desc: {el: "Βότκα, Μαστίχα, Κράνμπερι", en: "Vodka, Mastic, Cranberry"} },
-      { name: "Mango Mule", price: 6.00, desc: "Alcohol Free", tags: ['0%'] },
-      { name: "Red Paseo", price: 6.00, desc: "Alcohol Free", tags: ['0%'] }
+      { name: "Mango Mule", price: 6.00, desc: {el: "Χυμός Ανανά, Λάιμ, Πουρές Μάνγκο, Τόνικ (Alcohol Free)", en: "Pineapple juice, Lime, Mango Puree, Tonic (Alcohol Free)"}, tags: ['0%'] },
+      { name: "Red Paseo", price: 6.00, desc: {el: "Χυμός Κράνμπερι, Πουρές ρόδι, Λεμόνι (Alcohol Free)", en: "Cranberry Juice, Pomegranate Puree, Lemon (Alcohol Free)"}, tags: ['0%'] },
+      { name: "Lady Lavender", price: 6.00, desc: {el: "Γρεναδίνη, Σιρόπι λεβάντας, Σόδα, Γκρέιπφρουτ (Alcohol Free)", en: "Grenadine, Lavender, Soda, Grapefruit (Alcohol Free)"}, tags: ['0%'] },
+      { name: "Green Gentleman", price: 6.50, desc: {el: "Χυμός Ακτινίδιο, Πορτοκάλι, Πουρές Ροδάκινο (Alcohol Free)", en: "Kiwi juice, Orange, Peach puree (Alcohol Free)"}, tags: ['0%'] }
     ]
   },
   // 5. CLASSICS
   {
     id: 'classics', title: {el: "Classic Cocktails", en: "Classic Cocktails"}, type: 'list', img: ASSETS.cat_cocktail,
     items: [
-      { name: "Aperol Spritz", price: 8.00 }, { name: "Negroni", price: 9.00 },
-      { name: "Mojito", price: 9.00 }, { name: "Daiquiri", price: 9.00 },
-      { name: "Margarita", price: 9.00 }, { name: "Cosmopolitan", price: 9.00 },
-      { name: "Pina Colada", price: 9.00 }, { name: "Paloma", price: 8.50 },
-      { name: "Old Fashioned", price: 9.00 }
+      { name: "Aperol Spritz", price: 8.00, desc: {el: "Aperol, Cinzano To Spritz, Schweppes Soda", en: "Aperol, Cinzano To Spritz, Schweppes Soda"} },
+      { name: "Negroni", price: 9.00, desc: {el: "Campari, Bulldog Gin, Cinzano 1757", en: "Campari, Bulldog Gin, Cinzano 1757"} },
+      { name: "Mojito", price: 9.00, desc: {el: "Λευκό ρούμι, Λάιμ, Σόδα, Μαύρη ζάχαρη", en: "White Rum, Lime, Soda, Brown Sugar"} },
+      { name: "Daiquiri", price: 9.00, desc: {el: "Λευκό Ρούμι, Λάιμ, Σιρόπι ζάχαρης", en: "White Rum, Lime, Sugar Syrup"} },
+      { name: "Daiquiri Strawberry", price: 10.00, desc: {el: "Λευκό Ρούμι, Λάιμ, Πουρές Φράουλα, Ζάχαρη", en: "White Rum, Lime, Strawberry Puree, Sugar"} },
+      { name: "Margarita", price: 9.00, desc: {el: "Tequila, Triple Sec, Λεμόνι", en: "Tequila, Triple Sec, Fresh lemon"} },
+      { name: "Cosmopolitan", price: 9.00, desc: {el: "Βότκα, Triple Sec, Κράνμπερι, Λάιμ", en: "Vodka, Triple Sec, Cranberry, Lime"} },
+      { name: "Long Island", price: 10.00, desc: {el: "Triple Sec, Ρούμι, Τζιν, Βότκα, Tequila, Cola, Λάιμ", en: "Triple Sec, Rum, Gin, Vodka, Tequila, Cola, Lime"} },
+      { name: "Cuba Libre", price: 8.00, desc: {el: "Λευκό Ρούμι, Cola, Λάιμ, Angostura", en: "White Rum, Cola, Lime, Angostura"} },
+      { name: "Pina Colada", price: 9.00, desc: {el: "Λευκό Ρούμι, Ανανάς, Λικέρ Καρύδας", en: "White Rum, Pineapple, Coconut liqueur"} },
+      { name: "Caipirinha", price: 8.50, desc: {el: "Cachaca, Λάιμ, Μαύρη ζάχαρη", en: "Cachaca, Lime, Brown Sugar"} },
+      { name: "Caipiroska", price: 8.50, desc: {el: "Βότκα, Λάιμ, Μαύρη ζάχαρη", en: "Vodka, Lime, Brown Sugar"} },
+      { name: "Bloody Mary", price: 10.00, desc: {el: "Βότκα, Ντομάτα, Λεμόνι, Tabasco, Spices", en: "Vodka, Tomato, Lemon, Tabasco, Spices"} },
+      { name: "Paloma", price: 8.50, desc: {el: "Τεκίλα, Λάιμ, Pink Grapefruit Soda", en: "Tequila, Lime, Pink Grapefruit Soda"} },
+      { name: "Apple Martini", price: 9.00, desc: {el: "Βότκα, Λάιμ, Πράσινο μήλο, Λικέρ μήλου", en: "Vodka, Lime, Green apple, Apple liqueur"} },
+      { name: "Gin Cucumber", price: 8.50, desc: {el: "Τζιν, Σιρόπι αγγούρι, Λάιμ, Σόδα", en: "Gin, cucumber syrup, lime, Soda"} },
+      { name: "Old Fashioned", price: 9.00, desc: {el: "Ουίσκι, Angostura, Ζάχαρη", en: "Whiskey, Angostura, Sugar"} },
+      { name: "Dry Martini", price: 8.50, desc: {el: "Τζιν, Ξηρό Βερμούτ", en: "Gin, Dry Vermouth"} }
     ]
   },
   // 6. SPIRITS
@@ -306,16 +318,31 @@ const txt = (val, lang) => {
   return val['en'] || val['el'] || "";
 };
 
-// --- CORRECTED PRICE DISPLAY FUNCTION ---
+// --- FIX: ULTRA SAFE PRICE DISPLAY (PREVENTS BLACK SCREEN) ---
 const displayPrice = (item) => {
-  if (item.variants && item.variants.length > 0) {
-      if (item.variants.length === 1) {
-          return `€${item.variants[0].p.toFixed(2)}`;
+  try {
+      if (item.variants && item.variants.length > 0) {
+          const v1 = item.variants[0];
+          const v2 = item.variants[1];
+          
+          // Safety check for first variant
+          if (!v1 || typeof v1.p === 'undefined') return ""; 
+
+          if (!v2) {
+              return `€${v1.p.toFixed(2)}`;
+          }
+          return `€${v1.p.toFixed(2)} / €${v2.p.toFixed(2)}`;
       }
-      return `€${item.variants[0].p} / €${item.variants[1].p}`;
+      
+      if (typeof item.price !== 'undefined') {
+          return `€${item.price.toFixed(2)}`;
+      }
+      
+      return "";
+  } catch (e) {
+      console.error("Price error for item:", item, e);
+      return "€0.00"; // Fallback to prevent crash
   }
-  if (item.price) return `€${item.price.toFixed(2)}`;
-  return "";
 };
 
 const renderTags = (tags) => {

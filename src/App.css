@@ -9,10 +9,10 @@ body, html { margin: 0; padding: 0; background-color: #000; color: var(--text); 
 .public-root { width: 100vw; height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; overflow-y: auto; }
 .bg-image { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
 .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 1; }
-.public-content { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 500px; padding: 20px 0; }
+.public-content { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 500px; padding: 20px 0; display: flex; flex-direction: column; align-items: center; }
 .logo-main { width: 220px; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(197,160,101,0.5)); }
 .tagline { font-family: 'Cinzel'; color: var(--gold); letter-spacing: 3px; font-size: 14px; margin-bottom: 30px; }
-.reviews-slider { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); }
+.reviews-slider { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); width: 100%; }
 .stars { color: var(--gold); font-size: 16px; }
 .reviews-slider p { font-style: italic; font-size: 13px; margin: 5px 0; }
 .reviews-slider span { font-size: 11px; font-weight: 700; color: #ccc; }
@@ -25,7 +25,15 @@ body, html { margin: 0; padding: 0; background-color: #000; color: var(--text); 
 .btn-gold.small { width: auto; padding: 8px 15px; font-size: 12px; margin-top: 5px; display: inline-flex; align-items: center; gap: 5px; }
 .social-row { display: flex; gap: 15px; margin-top: 10px; }
 .social-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--gold); color: #fff; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); transition: 0.3s; }
-.footer-note { position: absolute; bottom: 20px; width: 100%; text-align: center; }
+
+/* FIX FOR FOOTER OVERLAP */
+.footer-note { 
+    margin-top: 40px; 
+    margin-bottom: 20px; 
+    width: 100%; 
+    text-align: center; 
+    position: relative; /* WAS ABSOLUTE */
+}
 
 .mobile-wrapper { width: 100vw; height: 100vh; background-color: #111; display: flex; justify-content: center; align-items: center; }
 .menu-phone-frame { width: 100%; height: 100%; max-width: 450px; background-color: var(--dark); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
