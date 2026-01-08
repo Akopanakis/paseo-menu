@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Heart, X, ChevronDown, ChevronUp, Clock, Star, Map, Instagram, MessageCircle, Globe, ChevronRight, Flame, Leaf, Sparkles, Dices, Info } from 'lucide-react';
+import { Heart, X, ChevronDown, ChevronUp, Clock, Star, Map, Instagram, MessageCircle, Globe, ChevronRight, Flame, Leaf, Sparkles, Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 
-// --- ASSETS (STABLE IMAGES) ---
+// --- ASSETS (ΑΚΡΙΒΗΣ ΑΝΤΙΣΤΟΙΧΙΑ ΜΕ ΤΑ SCREENSHOTS ΣΟΥ) ---
+// Προσοχή: Οι διαδρομές ξεκινάνε με / επειδή είναι στον φάκελο public
 const ASSETS = {
-  heroImage: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1080&q=80",
+  heroImage: "/hero-bg.jpg", // Βλέπω αυτό το αρχείο στο screenshot σου
   
-  // Grid Images (Main Menu Categories)
-  grid_coffee: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
-  grid_food: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80", 
-  grid_cocktails: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600&q=80",
-  grid_wine: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80",
+  // Grid Images (Αρχική Οθόνη) - Χρησιμοποιούμε τις υπάρχουσες
+  grid_coffee: "/hot-coffee.jpg",
+  grid_food: "/burger.jpg", 
+  grid_cocktails: "/cocktails.jpg",
+  grid_wine: "/wine.jpg",
   
-  // Detailed Category Headers
-  cat_coffee_hot: "https://images.unsplash.com/photo-1610889556528-9a770e32642f?auto=format&fit=crop&w=800&q=80", // Hot Coffee
-  cat_coffee_cold: "https://images.unsplash.com/photo-1517701604599-bb29b5c73311?auto=format&fit=crop&w=800&q=80", // Cold Coffee
-  cat_choc_tea: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80", // Tea/Choc
-  cat_juice_smoothie: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=800&q=80", // Smoothies
-  cat_refreshments: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80", // Cola/Soda
-  cat_brunch: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80", // Pancakes
-  cat_starters: "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=800&q=80", // Appetizers
-  cat_food: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80", // Pizza/Burgers
-  cat_main: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80", // Steak/Main
-  cat_signatures: "https://images.unsplash.com/photo-1536935338788-843bb6319105?auto=format&fit=crop&w=800&q=80",
-  cat_classics: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80",
-  cat_spirits: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&w=800&q=80",
-  cat_wine: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80",
-  cat_beer: "https://images.unsplash.com/photo-1623961990059-28437797f62d?auto=format&fit=crop&w=800&q=80",
-  cat_dessert: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=800&q=80",
+  // Φωτογραφίες Κατηγοριών (Headers)
+  cat_coffee_hot: "/hot-coffee.jpg",
+  cat_coffee_cold: "/cold-coffee.jpg",
+  cat_choc_tea: "/choco-tea.jpg",
+  cat_juice_smoothie: "/smoothies.jpg",
+  
+  cat_brunch: "/brunch.jpg",
+  cat_starters: "/starters.jpg",
+  cat_food: "/burger.jpg", 
+  cat_main: "/main-dishes.jpg",
+  
+  cat_signatures: "/signature.jpg", // Στο screenshot είναι signature.jpg (μικρά)
+  cat_classics: "/cocktails.jpg",
+  cat_spirits: "/spirits.jpg",      // Στο screenshot είναι spirits.jpg
+  cat_wine: "/wine.jpg",
+  cat_beer: "/Beers.jpg",           // Στο screenshot έχει κεφαλαίο B
+  cat_dessert: "/Desserts.jpg",     // Στο screenshot έχει κεφαλαίο D
 };
 
 // --- TRANSLATIONS ---
@@ -56,13 +58,13 @@ const UI = {
   }
 };
 
-// --- SOMMELIER LOGIC DB ---
+// --- SOMMELIER LOGIC ---
 const SOMMELIER_DB = {
     cocktails: [
         { name: "Daiquiri Strawberry", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Πουρές Φράουλα", en:"White Rum, Lime, Strawberry Puree"}, type: "sweet", bases: ["rum"] },
         { name: "Pina Colada", ingredients: {el:"Λευκό Ρούμι, Ανανάς, Λικέρ Καρύδας", en:"White Rum, Pineapple, Coconut Liqueur"}, type: "sweet", bases: ["rum"] },
         { name: "Stoly Kiss", ingredients: {el:"Βότκα, Μαστίχα, Κράνμπερι, Ρόδι", en:"Vodka, Mastic, Cranberry, Pomegranate"}, type: "sweet", bases: ["vodka"] },
-        { name: "Apple Martini", ingredients: {el:"Βότκα, Λάιμ, Πράσινο Μήλο, Λικέρ Μήλου", en:"Vodka, Lime, Green Apple"}, type: "sweet", bases: ["vodka"] },
+        { name: "Apple Martini", ingredients: {el:"Βότκα, Λάιμ, Πράσινο Μήλο", en:"Vodka, Lime, Green Apple"}, type: "sweet", bases: ["vodka"] },
         { name: "Aperol Spritz", ingredients: {el:"Aperol, Prosecco, Soda", en:"Aperol, Prosecco, Soda"}, type: "sour", bases: ["other"] },
         { name: "Mojito", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Σόδα, Μαύρη Ζάχαρη", en:"White Rum, Lime, Soda, Brown Sugar"}, type: "sour", bases: ["rum"] },
         { name: "Daiquiri", ingredients: {el:"Λευκό Ρούμι, Λάιμ, Σιρόπι", en:"White Rum, Lime, Syrup"}, type: "sour", bases: ["rum"] },
@@ -91,7 +93,7 @@ const SOMMELIER_DB = {
 
 // --- COMPLETE MENU DATA ---
 const MENU_DATA = [
-  // --- COFFEE & BEVERAGES SECTION ---
+  // --- COFFEE & BEVERAGES ---
   {
     id: 'coffee_hot', title: {el: "Καφέδες Ζεστοί", en: "Hot Coffee"}, type: 'list', img: ASSETS.cat_coffee_hot,
     items: [
@@ -124,7 +126,7 @@ const MENU_DATA = [
       { name: "Freddo Espresso", price: 3.50 },
       { name: "Freddo Cappuccino", price: 4.00 },
       { name: "Freddo Cappuccino Crema", price: 4.20 },
-      { name: "Extra Dose Espresso", price: 0.50 },
+      { name: {el: "Εξτρα Δόση Espresso", en: "Extra Dose Espresso"}, price: 0.50 },
       { name: "Nescafe Frappe", price: 3.00 },
       { name: "Nescafe Ice Cream Frappe", price: 4.50 },
       { name: "Nescafe Frappe Baileys", price: 5.00 },
@@ -487,14 +489,6 @@ const renderTags = (tags) => {
   );
 };
 
-const handleShare = async (item, lang) => {
-  const name = txt(item.name, lang);
-  if (navigator.share) {
-    try { await navigator.share({ title: 'Paseo Lounge Bar', text: `Check out the ${name} at Paseo! 🍸`, url: 'https://paseo.gr' }); } 
-    catch (err) { console.log('Error sharing', err); }
-  } else { alert("Copied to clipboard!"); }
-};
-
 const LuckySpinModal = ({ onClose, lang }) => {
   const [spinning, setSpinning] = useState(true);
   const [result, setResult] = useState(null);
@@ -790,7 +784,6 @@ function SecretMenu() {
                    <span className="price">{displayPrice(item)}</span>
                  </div>
                  <div className="actions-col">
-                   {/* Share button removed as requested */}
                    <motion.button className="fav-btn" whileTap={{ scale: 0.8 }} animate={{ scale: favorites.some(f => f.name === item.name) ? [1, 1.3, 1] : 1 }} transition={{ duration: 0.3 }} onClick={(e) => { e.stopPropagation(); handleFavClick(item); }}>
                      <Heart size={20} fill={favorites.some(f => f.name === item.name) ? "#C5A065" : "none"} color="#C5A065"/>
                    </motion.button>
